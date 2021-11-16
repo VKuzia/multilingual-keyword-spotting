@@ -41,13 +41,10 @@ class Model:
     Contains all information needed to be trained and to produce understandable output.
     Provides interface to make predictions as torch.nn.Module does.
 
-    Important note: this class is not responsible for training itself. This logic is moved to trainers.Trainer.
+    All children of this base must implement abstract methods providing model's kernel, optimizer and loss function.
 
-    TODO: dynamic parameters change.
-    TODO: loading to/from file.
+    Important note: this class is not responsible for training itself. This logic is moved to trainers.Trainer.
     """
-    optimizer_class: torch.optim.Optimizer
-    kernel_class: nn.Module
 
     def __init__(self, kernel: nn.Module, optimizer: torch.optim.Optimizer, loss_function: torch.nn.modules.Module,
                  info_tag: ModelInfoTag, cuda: bool = True):
@@ -91,6 +88,7 @@ class Model:
 
 
 def build_model_of(model_class: Type[Model], info_tag: ModelInfoTag, cuda: bool = True) -> Model:
+    """Constructs a default model of a given class"""
     kernel: nn.Module = model_class.get_default_kernel()
     model: Model = Model(kernel, model_class.get_default_optimizer(kernel),
                          model_class.get_default_loss_function(), info_tag, cuda)

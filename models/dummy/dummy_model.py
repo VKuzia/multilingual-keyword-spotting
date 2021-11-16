@@ -1,9 +1,7 @@
-from collections import Callable
-
 import torch.optim
 from torch import nn
 
-from models.model import Model, ModelInfoTag
+from models.model import Model
 
 
 class DummyKernel(nn.Module):
@@ -39,9 +37,3 @@ class DummyModel(Model):
     @staticmethod
     def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
         return torch.optim.SGD(kernel.parameters(), lr=0.001)
-
-    def __init__(self, info_tag: ModelInfoTag):
-        kernel: nn.Module = DummyKernel()
-        optimizer: torch.optim.Optimizer = torch.optim.SGD(kernel.parameters(), lr=0.001)
-        loss_function: Callable = torch.nn.NLLLoss()
-        super().__init__(kernel, optimizer, loss_function, info_tag)

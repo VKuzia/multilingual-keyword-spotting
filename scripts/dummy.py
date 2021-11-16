@@ -10,14 +10,14 @@ import torch
 from dataloaders.dataloader import DataLoader
 from models.dummy.dummy_dataloader import DummyDataLoader
 from models.dummy.dummy_model import DummyModel
-from models.model import ModelInfoTag
+from models.model import ModelInfoTag, build_model_of, Model
 from models.model_loader import ModelIOHelper
 from scripts.paths import PATH_TO_SAVED_MODELS
 from trainers.handlers.handlers import TimeEpochHandler, StepLossHandler, ClassificationValidator
 from trainers.trainer import Trainer, TrainingParams, DefaultTrainer
 
 # Initializing the model and training parameters
-model: DummyModel = DummyModel(ModelInfoTag("my_dummy_model", "0_0_1"))
+model: Model = build_model_of(DummyModel, ModelInfoTag("my_dummy_model", "0_0_2"))
 
 data_loader: DataLoader = DummyDataLoader()
 validation_data_loader: DataLoader = DummyDataLoader()
@@ -38,3 +38,8 @@ print(model(data))
 # Example of saving model
 model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
 model_io.save_model(model)
+
+# Example of loading model
+model: Model = model_io.load_model(DummyModel, ModelInfoTag("my_dummy_model", "0_0_2"), 1)
+data = torch.rand((1, 128)).to('cuda')
+print(model(data))

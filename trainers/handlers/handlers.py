@@ -9,6 +9,7 @@ from typing.io import IO
 
 from dataloaders.dataloader import DataLoader
 from models.model import Model
+from models.model_loader import ModelIOHelper
 
 
 class HandlerMode(Enum):
@@ -106,8 +107,10 @@ class ClassificationValidator(LearningHandler):
         self.output_stream = output_stream
 
     def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
-        """Performs self.batch_count tests accumulating number of correct answers
-         and writes the final accuracy to self.output_stream"""
+        """
+        Performs self.batch_count tests accumulating number of correct answers
+        and writes the final accuracy to self.output_stream
+        """
         correct: int = 0
         for batch_num in range(self.batch_count):
             data_batch, labels_batch = self.data_loader.get_batch(self.batch_size)
@@ -120,10 +123,20 @@ class ClassificationValidator(LearningHandler):
 
 class ModelSaver(LearningHandler):
     """
-    TODO
-    Model saving can be performed via such a handler.
+    Saves the model one time in epoch_rate epochs. Uses ModelIOHelper instance provided.
     """
 
+    def __init__(self, model_io: ModelIOHelper, epoch_rate: int, path: Optional[str] = None,
+                 use_base_path: bool = True):
+        self.model_io = model_io
+        self.epoch_rate = epoch_rate
+        self.epochs_to_save = epoch_rate
+        self.path: Optional[str] = path
+        self.use_base_path: bool = use_base_path
+
     def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
-        """TODO"""
-        pass
+        """Decreases self.epochs_to_save and if it's time to save the model, uses self.model_io to do it"""
+        self.epochs_to_save -= 1
+        if self.epochs_to_save == 0:
+            self.epochs_to_save = self.epoch_rate
+            self.model_io.save_model(model, self.path, self.use_base_path)
