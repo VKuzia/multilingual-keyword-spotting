@@ -11,6 +11,8 @@ from dataloaders.dataloader import DataLoader
 from models.dummy.dummy_dataloader import DummyDataLoader
 from models.dummy.dummy_model import DummyModel
 from models.model import ModelInfoTag
+from models.model_loader import ModelIOHelper
+from scripts.paths import PATH_TO_SAVED_MODELS
 from trainers.handlers.handlers import TimeEpochHandler, StepLossHandler, ClassificationValidator
 from trainers.trainer import Trainer, TrainingParams, DefaultTrainer
 
@@ -32,3 +34,7 @@ trainer.train(model, data_loader, training_params)
 # Example of model's prediction
 data = torch.rand((1, 128)).to('cuda')
 print(model(data))
+
+# Example of saving model
+model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
+model_io.save_model(model)
