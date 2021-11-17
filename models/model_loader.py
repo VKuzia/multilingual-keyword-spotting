@@ -24,19 +24,21 @@ class ModelIOHelper:
     def __init__(self, base_path: str = "saved_models/"):
         self.base_path = base_path
 
-    def load_model(self, model_class: Type[Model], model_info: ModelInfoTag, checkpoint_version: int) -> Model:
+    def load_model(self, model_class: Type[Model], model_info: ModelInfoTag, checkpoint_version: int,
+                   optimizer: Optional[torch.optim.Optimizer] = None) -> Model:
         """
         Constructs Model instance using locally saved checkpoint and model_info.
         :param model_class: class to construct instance of
         :param model_info: model's name parameters to specify model to load
         :param checkpoint_version: identifier of saved checkpoint
+        :param optimizer: optimizer to load model with. If None, last saved optimizer is used as models' default one.
         :return: constructed model
         """
         path = self.get_dir(model_info, checkpoint_version)
         return self.load_model_by_path(model_class, path, checkpoint_version)
 
     def load_model_by_path(self, model_class: Type[Model], path: str, checkpoint_version: int = 0,
-                           use_base_path: bool = True) -> Model:
+                           use_base_path: bool = True, optimizer: Optional[torch.optim.Optimizer] = None) -> Model:
         """
         Constructs Model instance according specified path and class type.
         Basically builds the default model and assigns loaded dictionaries to its parameters.
@@ -44,6 +46,7 @@ class ModelIOHelper:
         :param path: path to load model from
         :param checkpoint_version: identifier of saved checkpoint
         :param use_base_path: specifies whether to use self.base_path prefix for loading the model.
+        :param optimizer: optimizer to load model with. If None, last saved optimizer is used as models' default one.
         :return: constructed model.
 
         TODO: correct IO exceptions handling
@@ -58,7 +61,10 @@ class ModelIOHelper:
 
             model: Model = build_model_of(model_class, info_tag)
             model.kernel.load_state_dict(torch.load(f"{path}/{KERNEL_STATE_DICT_NAME}"))
-            model.optimizer.load_state_dict(torch.load(f"{path}/{OPTIMIZER_STATE_DICT_NAME}"))
+            if optimizer is None:
+                model.optimizer.load_state_dict(torch.load(f"{path}/{OPTIMIZER_STATE_DICT_NAME}"))
+            else:
+                model.optimizer = optimizer
             model.learning_info = learning_info
             model.checkpoint_id = checkpoint_version
             return model
