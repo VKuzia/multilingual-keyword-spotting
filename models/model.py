@@ -28,6 +28,10 @@ class ModelLearningInfo:
 
 @dataclass
 class ModelCheckpoint:
+    """
+    Dataclass containing model's state to be saved.
+    Is used in loading and saving models. See ModelIOHelper.
+    """
     kernel_state_dict: Dict[Any, Any]
     optimizer_state_dict: Dict[Any, Any]
     learning_info: ModelLearningInfo
@@ -74,21 +78,24 @@ class Model:
     @staticmethod
     @abstractmethod
     def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
+        """Returns optimizer to construct initial models of given class with"""
         pass
 
     @staticmethod
     @abstractmethod
     def get_default_kernel() -> nn.Module:
+        """Returns kernel (nn.Module) to construct initial models of given class with"""
         pass
 
     @staticmethod
     @abstractmethod
     def get_default_loss_function() -> torch.nn.modules.Module:
+        """Returns loss function to construct models of given class with"""
         pass
 
 
 def build_model_of(model_class: Type[Model], info_tag: ModelInfoTag, cuda: bool = True) -> Model:
-    """Constructs a default model of a given class"""
+    """Returns a default (initial) model of a given class"""
     kernel: nn.Module = model_class.get_default_kernel()
     model: Model = Model(kernel, model_class.get_default_optimizer(kernel),
                          model_class.get_default_loss_function(), info_tag, cuda)

@@ -35,7 +35,7 @@ class ModelIOHelper:
         :return: constructed model
         """
         path = self.get_dir(model_info, checkpoint_version)
-        return self.load_model_by_path(model_class, path, checkpoint_version)
+        return self.load_model_by_path(model_class, path, checkpoint_version, True, optimizer)
 
     def load_model_by_path(self, model_class: Type[Model], path: str, checkpoint_version: int = 0,
                            use_base_path: bool = True, optimizer: Optional[torch.optim.Optimizer] = None) -> Model:

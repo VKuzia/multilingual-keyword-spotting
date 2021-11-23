@@ -1,19 +1,16 @@
-from collections import Callable
-from typing import Any, Dict
-
 import torch.optim
 import torchvision
 from torch import nn
 
-from models.model import Model, ModelInfoTag
+from models.model import Model
 
 
 class CoreKernel(nn.Module):
     def __init__(self, efficient_net: nn.Module, output_categories: int):
         super().__init__()
         self.efficient_net = efficient_net
-        for layer in self.efficient_net.parameters():
-            layer.requires_grad = False
+        # for layer in self.efficient_net.parameters():
+        #     layer.requires_grad = False
 
         self.relu1 = nn.Sequential(
             nn.Linear(1000, 2048),
@@ -52,11 +49,11 @@ class CoreModel(Model):
 
     @staticmethod
     def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
-        return torch.optim.SGD(kernel.parameters(), lr=0.001)
+        return torch.optim.SGD(kernel.parameters(), lr=0.1)
 
     @staticmethod
     def get_default_kernel() -> nn.Module:
-        backbone: nn.Module = torchvision.models.efficientnet_b0(pretrained=True)
+        backbone: nn.Module = torchvision.models.efficientnet_b0(pretrained=False)
         return CoreKernel(backbone, 100)
 
     @staticmethod

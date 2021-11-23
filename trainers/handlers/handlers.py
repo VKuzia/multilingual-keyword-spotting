@@ -130,7 +130,7 @@ class ModelSaver(LearningHandler):
     Saves the model one time in epoch_rate epochs. Uses ModelIOHelper instance provided.
     """
 
-    def __init__(self, model_io: ModelIOHelper, epoch_rate: int, path: Optional[str] = None,
+    def __init__(self, model_io: ModelIOHelper, epoch_rate: int = 1, path: Optional[str] = None,
                  use_base_path: bool = True):
         self.model_io = model_io
         self.epoch_rate = epoch_rate
