@@ -23,7 +23,7 @@ data_loader: DataLoader = DummyDataLoader()
 validation_data_loader: DataLoader = DummyDataLoader()
 
 time_measure_handler: TimeEpochHandler = TimeEpochHandler()
-validator: ClassificationValidator = ClassificationValidator(validation_data_loader, batch_count=10, batch_size=10000)
+validator: ClassificationValidator = ClassificationValidator(validation_data_loader, batch_count=10)
 trainer: Trainer = DefaultTrainer([time_measure_handler], [StepLossHandler()], [time_measure_handler, validator])
 
 training_params: TrainingParams = TrainingParams(batch_count=5, batch_size=100000, epoch_count=10)
