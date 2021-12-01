@@ -1,6 +1,6 @@
 import os
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, List
 
 import torch
 import torchaudio
@@ -40,10 +40,9 @@ class CoreDataLoader(DataLoader):
 
     TODO: fix typing.
     """
-    # all possible labels in dataset. TODO: separate main and unknown ones.
-    labels = ['backward', 'bed', 'bird', 'cat', 'dog', 'down', 'eight', 'five', 'follow', 'forward', 'four', 'go',
-              'happy', 'house', 'learn', 'left', 'marvin', 'nine', 'no', 'off', 'on', 'one', 'right', 'seven', 'sheila',
-              'six', 'stop', 'three', 'tree', 'two', 'up', 'visual', 'wow', 'yes', 'zero']
+
+    labels: List[str] = ["yes", "no", "up", "down", "left", "right", "on", "off", "stop", "go", "zero", "one", "two",
+                         "three", "four", "five", "six", "seven", "eight", "nine", "unknown"]
 
     class Mode(Enum):
         """Specifies the part of dataset to use in loader."""
@@ -56,23 +55,13 @@ class CoreDataLoader(DataLoader):
         self.dataset = SpeechCommandsDataset(path, str(mode.name).lower())
         self.batch_size = batch_size
         self.transform = torchaudio.transforms.Spectrogram(n_fft=97, hop_length=400)  # creates spectrograms of 1x49x40
-        if mode == CoreDataLoader.Mode.TRAINING:
-            self.loader = torch.utils.data.DataLoader(
-                self.dataset,
-                batch_size=self.batch_size,
-                shuffle=True,
-                collate_fn=self.collate_fn,
-                pin_memory=True
-            )
-        else:
-            self.loader = torch.utils.data.DataLoader(
-                self.dataset,
-                batch_size=batch_size,
-                shuffle=False,
-                drop_last=False,
-                collate_fn=self.collate_fn,
-                pin_memory=True
-            )
+        self.loader = torch.utils.data.DataLoader(
+            self.dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            collate_fn=self.collate_fn,
+            pin_memory=True
+        )
 
     def get_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
         return next(self._yield_batch())
@@ -84,7 +73,10 @@ class CoreDataLoader(DataLoader):
 
     def label_to_index(self, word):
         """Returns the index of the given word"""
-        return torch.tensor(self.labels.index(word))
+        if word in self.labels:
+            return torch.tensor(self.labels.index(word))
+        else:
+            return torch.tensor(len(self.labels) - 1)  # unknown
 
     @staticmethod
     def pad_sequence(batch):

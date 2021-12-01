@@ -54,7 +54,27 @@ class CoreModel(Model):
     @staticmethod
     def get_default_kernel() -> nn.Module:
         backbone: nn.Module = torchvision.models.efficientnet_b0(pretrained=False)
-        return CoreKernel(backbone, 100)
+        return CoreKernel(backbone, 21)
+
+    @staticmethod
+    def get_default_loss_function() -> torch.nn.modules.Module:
+        return torch.nn.NLLLoss()
+
+
+class CoreModel2(Model):
+    """
+    The core of a multilingual embedding.
+    Uses a pretrained instance of EfficientNet_b2.
+    """
+
+    @staticmethod
+    def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
+        return torch.optim.SGD(kernel.parameters(), lr=0.1)
+
+    @staticmethod
+    def get_default_kernel() -> nn.Module:
+        backbone: nn.Module = torchvision.models.efficientnet_b2(pretrained=False)
+        return CoreKernel(backbone, 21)
 
     @staticmethod
     def get_default_loss_function() -> torch.nn.modules.Module:
