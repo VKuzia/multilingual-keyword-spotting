@@ -44,7 +44,7 @@ class CoreKernel(nn.Module):
 class CoreModel(Model):
     """
     The core of a multilingual embedding.
-    Uses a pretrained instance of EfficientNet_b0.
+    Uses an untrained instance of EfficientNet_b0.
     """
 
     @staticmethod
@@ -64,7 +64,7 @@ class CoreModel(Model):
 class CoreModel2(Model):
     """
     The core of a multilingual embedding.
-    Uses a pretrained instance of EfficientNet_b2.
+    Uses an untrained instance of EfficientNet_b2.
     """
 
     @staticmethod

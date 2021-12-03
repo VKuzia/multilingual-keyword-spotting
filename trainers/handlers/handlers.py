@@ -4,10 +4,8 @@ import time
 from enum import Enum
 from typing import Optional
 
-import torch
 from typing.io import IO
 
-from dataloaders.dataloader import DataLoader
 from models.model import Model
 from models.model_loader import ModelIOHelper
 
