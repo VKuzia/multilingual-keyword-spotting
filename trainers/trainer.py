@@ -78,7 +78,7 @@ class DefaultTrainer(Trainer):
         """Iterates over params.batch_count of batches, to train on them.
         Invokes after_step_handlers after pushing the gradients backward."""
         for batch_num in range(params.batch_count):
-            data_batch, labels_batch = data_loader.get_batch(params.batch_size)
+            data_batch, labels_batch = data_loader.get_batch()
             model_output = model(data_batch)
             loss = model.loss_function(model_output, labels_batch)
             model.optimizer.zero_grad()
