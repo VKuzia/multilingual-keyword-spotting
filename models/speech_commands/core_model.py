@@ -6,11 +6,12 @@ from models.model import Model
 
 
 class CoreKernel(nn.Module):
+    """PyTorch model used as a kernel of CoreModel"""
+
     def __init__(self, efficient_net: nn.Module, output_categories: int):
         super().__init__()
+        self.output_categories = output_categories
         self.efficient_net = efficient_net
-        # for layer in self.efficient_net.parameters():
-        #     layer.requires_grad = False
 
         self.relu1 = nn.Sequential(
             nn.Linear(1000, 2048),
@@ -29,7 +30,7 @@ class CoreKernel(nn.Module):
             nn.SELU()
         )
         self.output = nn.Sequential(
-            nn.Linear(1024, output_categories),
+            nn.Linear(1024, self.output_categories),
             nn.LogSoftmax(dim=1)
         )
 
@@ -53,12 +54,16 @@ class CoreModel(Model):
 
     @staticmethod
     def get_default_kernel() -> nn.Module:
-        backbone: nn.Module = torchvision.models.efficientnet_b0(pretrained=False)
-        return CoreKernel(backbone, 21)
+        return CoreModel.get_default_core_kernel()
 
     @staticmethod
     def get_default_loss_function() -> torch.nn.modules.Module:
         return torch.nn.NLLLoss()
+
+    @staticmethod
+    def get_default_core_kernel() -> CoreKernel:
+        backbone: nn.Module = torchvision.models.efficientnet_b0(pretrained=False)
+        return CoreKernel(backbone, 21)
 
 
 class CoreModel2(Model):
@@ -79,3 +84,8 @@ class CoreModel2(Model):
     @staticmethod
     def get_default_loss_function() -> torch.nn.modules.Module:
         return torch.nn.NLLLoss()
+
+    @staticmethod
+    def get_default_core_kernel() -> CoreKernel:
+        backbone: nn.Module = torchvision.models.efficientnet_b2(pretrained=False)
+        return CoreKernel(backbone, 21)

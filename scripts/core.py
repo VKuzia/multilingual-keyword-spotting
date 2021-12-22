@@ -13,17 +13,17 @@ from trainers.trainer import DefaultTrainer, Trainer, TrainingParams
 info_tag: ModelInfoTag = ModelInfoTag("core_embedding", "0_0_2")
 model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
 # model: Model = build_model_of(CoreModel2, info_tag)
-model: Model = model_io.load_model(CoreModel2, info_tag, 45)
-model.optimizer = torch.optim.SGD(model.kernel.parameters(), lr=0.005)
+model: Model = model_io.load_model(CoreModel2, info_tag, 180)
+model.optimizer = torch.optim.SGD(model.kernel.parameters(), lr=0.000021)
 
-train_loader: CoreDataLoader = CoreDataLoader(PATH_TO_SPEECH_COMMANDS, CoreDataLoader.Mode.TRAINING, 128)
-validation_loader: CoreDataLoader = CoreDataLoader(PATH_TO_SPEECH_COMMANDS, CoreDataLoader.Mode.VALIDATION, 128)
+train_loader: CoreDataLoader = CoreDataLoader(PATH_TO_SPEECH_COMMANDS, CoreDataLoader.SpeechCommandsMode.TRAINING, 128)
+validation_loader: CoreDataLoader = CoreDataLoader(PATH_TO_SPEECH_COMMANDS, CoreDataLoader.SpeechCommandsMode.VALIDATION, 128)
 
 time_measure_handler: TimeEpochHandler = TimeEpochHandler()
 validator: ClassificationValidator = ClassificationValidator(validation_loader, batch_count=5)
 trainer: Trainer = DefaultTrainer([time_measure_handler], [StepLossHandler()],
                                   [time_measure_handler, validator, ModelSaver(model_io)])
 
-training_params: TrainingParams = TrainingParams(batch_count=1000, batch_size=128, epoch_count=50)
+training_params: TrainingParams = TrainingParams(batch_count=1000, batch_size=128, epoch_count=20)
 
 trainer.train(model, train_loader, training_params)

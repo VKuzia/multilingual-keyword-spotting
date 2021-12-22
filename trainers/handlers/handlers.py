@@ -32,20 +32,20 @@ class LearningHandler(ABC):
         """
         Performs the handlers job. May change/read from model.
         :param model: the Model instance to get information from or perform task on.
-        :param mode: current stage of learning, is used to perform different tasks in different stages of learning
+        :param mode: current stage of learning, used to perform tasks in distinct stages of learning
         without need to share the data elsewhere but inside the LearningHandler
         :return: None.
         :raises: ValueError if the task can't be performed with current mode
         """
-        pass
 
 
 class TimeEpochHandler(LearningHandler):
     """
-    Implementation of LearningHandler which is used to measure time elapsed within one epoch training.
-    To be correctly used needs to be both in pre_epoch_handlers and post_epoch_handlers (see trainers.Trainer).
-    Should be the last in pre_epoch_handlers and first in post_epoch_handlers to measure train time without
-    other handlers jobs.
+    Implementation of LearningHandler used to measure time elapsed within one epoch training.
+    To be work fine must to be both in pre_epoch_handlers and post_epoch_handlers
+    (see trainers.Trainer).
+    Should be the last in pre_epoch_handlers and first in post_epoch_handlers to measure train time
+    without other handlers jobs.
     """
 
     def __init__(self, output_stream: IO[str] = sys.stdout):
@@ -112,7 +112,7 @@ class ModelSaver(LearningHandler):
         self.use_base_path: bool = use_base_path
 
     def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
-        """Decreases self.epochs_to_save and if it's time to save the model, uses self.model_io to do it"""
+        """Decreases self.epochs_to_save and uses self.model_io to save model when needed"""
         self.epochs_to_save -= 1
         if self.epochs_to_save == 0:
             self.epochs_to_save = self.epoch_rate

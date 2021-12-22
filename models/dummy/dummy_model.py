@@ -5,6 +5,8 @@ from models.model import Model
 
 
 class DummyKernel(nn.Module):
+    """PyTorch model used as a kernel of DummyModel"""
+
     def __init__(self):
         super().__init__()
         self.linear_input = nn.Sequential(

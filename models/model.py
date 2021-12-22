@@ -1,9 +1,9 @@
+from typing import Dict, Any, Type, Optional
 from abc import abstractmethod
 from dataclasses import dataclass
 
 import torch.optim
 from torch import nn
-from typing import Dict, Any, Type
 
 
 @dataclass
@@ -36,7 +36,7 @@ class ModelCheckpoint:
     optimizer_state_dict: Dict[Any, Any]
     learning_info: ModelLearningInfo
     info_tag: ModelInfoTag
-    id: int
+    checkpoint_id: int
 
 
 class Model:
@@ -45,12 +45,15 @@ class Model:
     Contains all information needed to be trained and to produce understandable output.
     Provides interface to make predictions as torch.nn.Module does.
 
-    All children of this base must implement abstract methods providing model's kernel, optimizer and loss function.
+    All children of this base must implement abstract methods providing model's kernel,
+    optimizer and loss function.
 
-    Important note: this class is not responsible for training itself. This logic is moved to trainers.Trainer.
+    Important note: this class is not responsible for training itself.
+    This logic is moved to trainers.Trainer.
     """
 
-    def __init__(self, kernel: nn.Module, optimizer: torch.optim.Optimizer, loss_function: torch.nn.modules.Module,
+    def __init__(self, kernel: nn.Module, optimizer: torch.optim.Optimizer,
+                 loss_function: torch.nn.modules.Module,
                  info_tag: ModelInfoTag, cuda: bool = True):
         self.kernel: nn.Module = kernel.to('cuda' if cuda else 'cpu')
         self.optimizer: torch.optim.Optimizer = optimizer
@@ -68,6 +71,10 @@ class Model:
         return self.kernel(data)
 
     def build_checkpoint(self) -> ModelCheckpoint:
+        """
+        Returns model's data in a form of a ModelCheckpoint instance
+        :return: ModelCheckpoint instance
+        """
         self.checkpoint_id += 1
         return ModelCheckpoint(self.kernel.state_dict(),
                                self.optimizer.state_dict(),
@@ -79,24 +86,25 @@ class Model:
     @abstractmethod
     def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
         """Returns optimizer to construct initial models of given class with"""
-        pass
 
     @staticmethod
     @abstractmethod
     def get_default_kernel() -> nn.Module:
         """Returns kernel (nn.Module) to construct initial models of given class with"""
-        pass
 
     @staticmethod
     @abstractmethod
     def get_default_loss_function() -> torch.nn.modules.Module:
         """Returns loss function to construct models of given class with"""
-        pass
 
 
-def build_model_of(model_class: Type[Model], info_tag: ModelInfoTag, cuda: bool = True) -> Model:
+def build_model_of(model_class: Type[Model], info_tag: ModelInfoTag, *,
+                   kernel: Optional[nn.Module] = None,
+                   optimizer: Optional[torch.optim.Optimizer] = None,
+                   cuda: bool = True) -> Model:
     """Returns a default (initial) model of a given class"""
-    kernel: nn.Module = model_class.get_default_kernel()
-    model: Model = Model(kernel, model_class.get_default_optimizer(kernel),
-                         model_class.get_default_loss_function(), info_tag, cuda)
+    kernel: nn.Module = kernel if kernel is not None else model_class.get_default_kernel()
+    optimizer: torch.optim.Optimizer = \
+        optimizer if optimizer is not None else model_class.get_default_optimizer(kernel)
+    model: Model = Model(kernel, optimizer, model_class.get_default_loss_function(), info_tag, cuda)
     return model

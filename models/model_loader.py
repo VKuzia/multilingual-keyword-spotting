@@ -1,11 +1,11 @@
 from typing import Optional, Type, Any, Dict
 
-import torch
 import json
-
-from models.model import Model, ModelCheckpoint, build_model_of, ModelInfoTag, ModelLearningInfo
 import os
 import shutil
+import torch
+
+from models.model import Model, ModelCheckpoint, build_model_of, ModelInfoTag, ModelLearningInfo
 
 KERNEL_STATE_DICT_NAME = "kernel_state.pth"
 OPTIMIZER_STATE_DICT_NAME = "optimizer_state.pth"
@@ -16,7 +16,8 @@ LEARNING_INFO_NAME = "learning.json"
 class ModelIOHelper:
     """
     This class is able of loading and saving models using their info tags and class type.
-    Uses base directory specified in constructor and naming logic using specified constants and get_dir method.
+    Uses base directory specified in constructor and
+    naming logic using specified constants with get_dir method.
 
     TODO: correct IO exceptions handling
     """
@@ -24,7 +25,8 @@ class ModelIOHelper:
     def __init__(self, base_path: str = "saved_models/"):
         self.base_path = base_path
 
-    def load_model(self, model_class: Type[Model], model_info: ModelInfoTag, checkpoint_version: int) -> Model:
+    def load_model(self, model_class: Type[Model], model_info: ModelInfoTag,
+                   checkpoint_version: int) -> Model:
         """
         Constructs Model instance using locally saved checkpoint and model_info.
         :param model_class: class to construct instance of
@@ -50,7 +52,8 @@ class ModelIOHelper:
         """
         if use_base_path:
             path = self.base_path + path
-        with open(f"{path}/{INFO_NAME}", "r") as info_file, open(f"{path}/{LEARNING_INFO_NAME}", "r") as learning_file:
+        with open(f"{path}/{INFO_NAME}", "r") as info_file, open(f"{path}/{LEARNING_INFO_NAME}",
+                                                                 "r") as learning_file:
             info_dict: Dict[str, Any] = json.loads(info_file.readline())
             info_tag: ModelInfoTag = ModelInfoTag(**info_dict)
             learning_dict: Dict[str, Any] = json.loads(learning_file.readline())
@@ -63,7 +66,8 @@ class ModelIOHelper:
             model.checkpoint_id = checkpoint_version
             return model
 
-    def save_model(self, model: Model, path: Optional[str] = None, use_base_path: bool = True) -> None:
+    def save_model(self, model: Model, path: Optional[str] = None,
+                   use_base_path: bool = True) -> None:
         """
         Saves model's checkpoint into the directory specified by self.get_dir logic.
         :param model: model to save
@@ -77,7 +81,7 @@ class ModelIOHelper:
         if path is None:
             raise ValueError("Couldn't save model as path is null.")
         checkpoint: ModelCheckpoint = model.build_checkpoint()
-        dir_name: str = self.get_dir(checkpoint.info_tag, checkpoint.id)
+        dir_name: str = self.get_dir(checkpoint.info_tag, checkpoint.checkpoint_id)
         final_path: str = path + dir_name
         try:
             if os.path.exists(final_path):
