@@ -39,7 +39,7 @@ def estimate_accuracy(model: Model, data_loader: DataLoader, batch_count: int) -
     """
     correct: int = 0
     total: int = 0
-    for batch_num in range(batch_count):
+    for _ in range(batch_count):
         data_batch, labels_batch = data_loader.get_batch()
         model_output = model(data_batch).argmax(dim=1)
         correct += torch.sum(model_output == labels_batch).item()

@@ -37,7 +37,6 @@ class LearningHandler(ABC):
         :return: None.
         :raises: ValueError if the task can't be performed with current mode
         """
-        pass
 
 
 class TimeEpochHandler(LearningHandler):

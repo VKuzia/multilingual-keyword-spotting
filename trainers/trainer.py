@@ -44,7 +44,7 @@ class Trainer:
         :param params: the set of cycle's parameters
         :return: None
         """
-        for epoch in range(params.epoch_count):
+        for _ in range(params.epoch_count):
             for handler in self.pre_epoch_handlers:
                 handler.handle(model, mode=HandlerMode.PRE_EPOCH)
 
@@ -66,7 +66,6 @@ class Trainer:
         :param after_step_handlers: set of handlers to invoke after a step of learning is performed.
         :return: None.
         """
-        pass
 
 
 class DefaultTrainer(Trainer):
@@ -79,7 +78,7 @@ class DefaultTrainer(Trainer):
                     after_step_handlers: List[LearningHandler] = None) -> None:
         """Iterates over params.batch_count of batches, to train on them.
         Invokes after_step_handlers after pushing the gradients backward."""
-        for batch_num in range(params.batch_count):
+        for _ in range(params.batch_count):
             data_batch, labels_batch = data_loader.get_batch()
             model_output = model(data_batch)
             loss = model.loss_function(model_output, labels_batch)
