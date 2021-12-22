@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import torch.optim
 from torch import nn
-from typing import Dict, Any, Type
+from typing import Dict, Any, Type, Optional
 
 
 @dataclass
@@ -94,9 +94,12 @@ class Model:
         pass
 
 
-def build_model_of(model_class: Type[Model], info_tag: ModelInfoTag, cuda: bool = True) -> Model:
+def build_model_of(model_class: Type[Model], info_tag: ModelInfoTag, *,
+                   kernel: Optional[nn.Module] = None,
+                   optimizer: Optional[torch.optim.Optimizer] = None,
+                   cuda: bool = True) -> Model:
     """Returns a default (initial) model of a given class"""
-    kernel: nn.Module = model_class.get_default_kernel()
-    model: Model = Model(kernel, model_class.get_default_optimizer(kernel),
-                         model_class.get_default_loss_function(), info_tag, cuda)
+    kernel: nn.Module = kernel if kernel is not None else model_class.get_default_kernel()
+    optimizer: torch.optim.Optimizer = optimizer if optimizer is not None else model_class.get_default_optimizer(kernel)
+    model: Model = Model(kernel, optimizer, model_class.get_default_loss_function(), info_tag, cuda)
     return model
