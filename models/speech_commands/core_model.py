@@ -6,6 +6,8 @@ from models.model import Model
 
 
 class CoreKernel(nn.Module):
+    """PyTorch model used as a kernel of CoreModel"""
+
     def __init__(self, efficient_net: nn.Module, output_categories: int):
         super().__init__()
         self.output_categories = output_categories

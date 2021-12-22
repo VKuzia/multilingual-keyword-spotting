@@ -1,15 +1,21 @@
 from typing import Tuple
 
 import torch
-import torchaudio
-
-from dataloaders.dataloader import DataLoader
-from models.speech_commands.core_dataloader import SpeechCommandsBase, SpeechCommandsDataset, SpeechCommandsMode
+from models.speech_commands.core_dataloader import SpeechCommandsBase, SpeechCommandsDataset, \
+    SpeechCommandsMode
 
 
 class FewShotSpeechCommandsDataLoader(SpeechCommandsBase):
+    """
+    Implementation of SpeechCommands dataset wrapper featured to work with few-shot models.
+    Accepts self.target as a word to be spotted and shuffles data in a way self.target_probability
+    of every batch is targets.
+    Based on SpeechCommandsDataset and
+    https://pytorch.org/tutorials/intermediate/speech_command_recognition_with_torchaudio.html
+    """
 
-    def __init__(self, target: str, path: str, mode: SpeechCommandsMode, batch_size: int, target_probability: float,
+    def __init__(self, target: str, path: str, mode: SpeechCommandsMode, batch_size: int,
+                 target_probability: float,
                  cuda: bool = True):
         super().__init__()
         self.target = target
@@ -41,8 +47,9 @@ class FewShotSpeechCommandsDataLoader(SpeechCommandsBase):
         return next(self._yield_batch())
 
     def _yield_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        for (target_data, target_labels), (non_target_data, non_target_labels) in zip(self.target_loader,
-                                                                                      self.non_target_loader):
+        for (target_data, target_labels), (non_target_data, non_target_labels) in zip(
+                self.target_loader,
+                self.non_target_loader):
             data = torch.concat((target_data, non_target_data), dim=0)
             labels = torch.concat((target_labels, non_target_labels), dim=0)
             transformed_data = self.transform(data).repeat(1, 3, 1, 1)

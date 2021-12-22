@@ -1,11 +1,13 @@
-import torch.nn
+import torch
 from torch import nn
 
 from models.model import Model
-from models.speech_commands.core_model import CoreKernel, CoreModel, CoreModel2
+from models.speech_commands.core_model import CoreKernel, CoreModel2
 
 
 class FewShotKernel(nn.Module):
+    """PyTorch model used as a kernel of FewShotModel."""
+
     def __init__(self, core_embedding: CoreKernel):
         super().__init__()
         self.core = core_embedding
@@ -23,6 +25,10 @@ class FewShotKernel(nn.Module):
 
 
 class FewShotModel(Model):
+    """
+    Implementation of a few-shot model based on CoreModel embedding
+    """
+
     @staticmethod
     def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
         return torch.optim.SGD(kernel.parameters(), lr=0.1)

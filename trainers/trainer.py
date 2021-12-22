@@ -37,7 +37,8 @@ class Trainer:
     def train(self, model: Model, data_loader: DataLoader, params: TrainingParams) -> None:
         """
         Performs the training loop for Model instance. All type of handlers are involved,
-        however the epoch training logic is encapsulated via @abstractmethod to give the space for extensibility.
+        however the epoch training logic is encapsulated
+        via @abstractmethod to give the space for extensibility.
         :param model: the Model instance to be trained
         :param data_loader: entity which provides the model with training data and training labels
         :param params: the set of cycle's parameters
@@ -62,7 +63,7 @@ class Trainer:
         :param model: the Model instance to be trained
         :param data_loader: entity which provides the model with training data and training labels
         :param params: the set of cycle's parameters
-        :param after_step_handlers: the set of handlers to invoke after one step of learning is performed.
+        :param after_step_handlers: set of handlers to invoke after a step of learning is performed.
         :return: None.
         """
         pass
@@ -70,7 +71,8 @@ class Trainer:
 
 class DefaultTrainer(Trainer):
     """
-    Implementation of Trainer which simply iterates over the batches_count of batches in a train_epoch method.
+    Implementation of Trainer which simply iterates over the batches_count
+    of batches in a train_epoch method.
     """
 
     def train_epoch(self, model: Model, data_loader: DataLoader, params: TrainingParams,

@@ -11,7 +11,8 @@ from trainers.handlers.handlers import LearningHandler, HandlerMode
 class ClassificationValidator(LearningHandler):
     """Performs accuracy estimation on a set of data provided via data_loader"""
 
-    def __init__(self, data_loader: DataLoader, batch_count: int, output_stream: IO[str] = sys.stdout):
+    def __init__(self, data_loader: DataLoader, batch_count: int,
+                 output_stream: IO[str] = sys.stdout):
         self.data_loader = data_loader
         self.batch_count = batch_count
         self.output_stream = output_stream
@@ -29,7 +30,8 @@ class ClassificationValidator(LearningHandler):
 def estimate_accuracy(model: Model, data_loader: DataLoader, batch_count: int) -> float:
     """
     Calculates accuracy for given model on given data_loader.
-    Accumulates number of correct answers in batch_count batches and returns the sum divided by total number of samples.
+    Accumulates number of correct answers in batch_count batches and
+    returns the sum divided by total number of samples.
     :param model: model to be estimated
     :param data_loader: data source to perform estimation on
     :param batch_count: number of batches to use for estimation
