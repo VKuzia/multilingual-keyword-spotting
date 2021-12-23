@@ -1,7 +1,7 @@
 from typing import Tuple
 
 import torch
-from models.speech_commands.core_dataloader import SpeechCommandsBase, SpeechCommandsDataset, \
+from src.models.speech_commands.core_dataloader import SpeechCommandsBase, SpeechCommandsDataset, \
     SpeechCommandsMode
 
 

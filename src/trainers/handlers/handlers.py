@@ -6,8 +6,8 @@ from typing import Optional
 
 from typing.io import IO
 
-from models.model import Model
-from models.model_loader import ModelIOHelper
+from src.models.model import Model
+from src.models.model_loader import ModelIOHelper
 
 
 class HandlerMode(Enum):

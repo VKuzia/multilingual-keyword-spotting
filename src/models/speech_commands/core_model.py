@@ -2,7 +2,7 @@ import torch.optim
 import torchvision
 from torch import nn
 
-from models.model import Model
+from src.models.model import Model
 
 
 class CoreKernel(nn.Module):

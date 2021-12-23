@@ -1,12 +1,13 @@
 from typing import Dict, Any, Type, Optional
 from abc import abstractmethod
-from dataclasses import dataclass
 
 import torch.optim
 from torch import nn
 
+from src.utils.decorators import no_none_dataclass
 
-@dataclass
+
+@no_none_dataclass
 class ModelInfoTag:
     """
     Dataclass containing information on the text description of the model.
@@ -16,7 +17,7 @@ class ModelInfoTag:
     version_tag: str
 
 
-@dataclass
+@no_none_dataclass
 class ModelLearningInfo:
     """
     Dataclass containing information about model learning progress.
@@ -26,7 +27,7 @@ class ModelLearningInfo:
     last_loss: float = 0.0
 
 
-@dataclass
+@no_none_dataclass
 class ModelCheckpoint:
     """
     Dataclass containing model's state to be saved.

@@ -5,7 +5,7 @@ import os
 import shutil
 import torch
 
-from models.model import Model, ModelCheckpoint, build_model_of, ModelInfoTag, ModelLearningInfo
+from src.models.model import Model, ModelCheckpoint, build_model_of, ModelInfoTag, ModelLearningInfo
 
 KERNEL_STATE_DICT_NAME = "kernel_state.pth"
 OPTIMIZER_STATE_DICT_NAME = "optimizer_state.pth"

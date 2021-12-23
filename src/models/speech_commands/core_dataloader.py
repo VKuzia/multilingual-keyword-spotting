@@ -6,8 +6,8 @@ from typing import Tuple, List, Callable
 import torch
 import torchaudio
 
-from dataloaders.dataloader import DataLoader
 from torchaudio.datasets import SPEECHCOMMANDS
+from src.dataloaders.dataloader import DataLoader
 
 
 class SpeechCommandsMode(Enum):

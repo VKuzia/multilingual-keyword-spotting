@@ -1,8 +1,8 @@
 import torch
 from torch import nn
 
-from models.few_shot.few_shot_dataloader import FewShotSpeechCommandsDataLoader
-from models.few_shot.few_shot_model import FewShotModel, FewShotKernel
+from src.models.few_shot import FewShotSpeechCommandsDataLoader
+from src.models.few_shot import FewShotModel, FewShotKernel
 from models.model import ModelInfoTag, build_model_of, Model
 from models.model_loader import ModelIOHelper
 from models.speech_commands.core_dataloader import CoreDataLoader, SpeechCommandsMode

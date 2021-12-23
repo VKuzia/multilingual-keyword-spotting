@@ -1,13 +1,13 @@
 from abc import abstractmethod
-from dataclasses import dataclass
 from typing import List
 
-from dataloaders.dataloader import DataLoader
-from trainers.handlers.handlers import LearningHandler, HandlerMode
-from models.model import Model
+from src.dataloaders.dataloader import DataLoader
+from src.trainers.handlers.handlers import LearningHandler, HandlerMode
+from src.models.model import Model
+from src.utils.decorators import no_none_dataclass
 
 
-@dataclass
+@no_none_dataclass
 class TrainingParams:
     """
     Dataclass containing parameters used in a network training loop.
