@@ -29,7 +29,8 @@ else:
 if not config['load_optimizer_from_file']:
     optimizer: torch.optim.Optimizer = build_optimizer(model, config['optimizer'],
                                                        config['optimizer_parameters'])
-#
+    model.optimizer = optimizer
+
 train_loader: CoreDataLoader = \
     CoreDataLoader(PATH_TO_SPEECH_COMMANDS, SpeechCommandsMode.TRAINING, config['batch_size'])
 validation_loader: CoreDataLoader = \

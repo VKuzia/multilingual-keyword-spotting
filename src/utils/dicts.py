@@ -1,7 +1,8 @@
-from typing import Any, Iterable, Optional, List, Dict
+from typing import Any, Optional, List, Dict
 
 
 def inspect_keys(dictionary: Optional[Dict[Any, Any]], keys: List[Any]):
+    """Ensures all specified keys are present in dictionary. Otherwise throws KeyError"""
     if dictionary is None:
         if keys:
             raise ValueError(f'Trying to use empty dict with non-empty keys')

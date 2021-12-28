@@ -6,16 +6,29 @@ from typing import Any, Dict, Optional
 
 
 class Config:
+    """
+    A set of json-like fields to be used in a dictionary-like manner.
+    """
 
     @property
     @abstractmethod
-    def default_dict(self):
+    def default_dict(self) -> Dict[str, Optional[Any]]:
+        """
+        Specifies all possible keys for config, provides their defaults.
+        Every child is supposed to be a set of independent rules, so there is no
+        need in inheriting such dicts.
+        """
         pass
 
     def __init__(self):
         self.data = self.default_dict.copy()
 
     def load_json(self, path: str) -> Config:
+        """
+        Loads configuration file using specified path, tries to map it into a dict.
+        :param path: path to json file to parse
+        :return: configuration dictionary-like object
+        """
         with open(path) as json_file:
             json_data: Dict[str, Any] = json.load(json_file)
         for key, value in json_data.items():
