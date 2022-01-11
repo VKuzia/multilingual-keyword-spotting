@@ -4,8 +4,8 @@ from config import ArgParser, TrainingConfig, build_optimizer
 from models import ModelInfoTag, Model, build_model_of, ModelIOHelper
 from models.speech_commands import CoreDataLoader, SpeechCommandsMode
 from models.speech_commands.classification import CoreModel2
-from trainers.handlers.handlers import TimeEpochHandler, StepLossHandler, ModelSaver
-from trainers.handlers.validators import ClassificationValidator
+from trainers.handlers import TimeEpochHandler, StepLossHandler, ModelSaver
+from trainers.handlers import ClassificationValidator
 from trainers.trainer import Trainer, DefaultTrainer, TrainingParams
 from paths import PATH_TO_SAVED_MODELS, PATH_TO_SPEECH_COMMANDS
 
