@@ -2,9 +2,9 @@ from typing import Optional, Dict, Any
 
 import torch.optim
 
-from src.models.model import Model
-from src.utils.decorators import no_none
-from src.utils.dicts import inspect_keys
+from src.models import Model
+from src.utils import no_none
+from src.utils import inspect_keys
 
 
 @no_none

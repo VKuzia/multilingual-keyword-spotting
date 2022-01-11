@@ -1,8 +1,8 @@
 import torch
 from torch import nn
 
-from src.models.model import Model
-from src.models.speech_commands.core_model import CoreKernel, CoreModel2
+from src.models import Model
+from src.models.speech_commands import CoreKernel, CoreModel2
 
 
 class FewShotKernel(nn.Module):

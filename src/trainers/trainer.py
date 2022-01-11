@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from typing import List
 
-from src.dataloaders.dataloader import DataLoader
-from src.trainers.handlers.handlers import LearningHandler, HandlerMode
-from src.models.model import Model
-from src.utils.decorators import no_none_dataclass
+from src.dataloaders import DataLoader
+from src.trainers.handlers import LearningHandler, HandlerMode
+from src.models import Model
+from src.utils import no_none_dataclass
 
 
 @no_none_dataclass
@@ -23,8 +23,6 @@ class Trainer:
     """
     Base class for performing the training cycle of a model.
     Provides an interface to train the model with given lists of handlers.
-
-    TODO: async loop to support models parameters changeability.
     """
 
     def __init__(self, pre_epoch_handlers: List[LearningHandler] = None,

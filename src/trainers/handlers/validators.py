@@ -3,9 +3,9 @@ from typing import IO
 
 import torch
 
-from src.dataloaders.dataloader import DataLoader
-from src.models.model import Model
-from src.trainers.handlers.handlers import LearningHandler, HandlerMode
+from src.dataloaders import DataLoader
+from src.models import Model
+from src.trainers.handlers import LearningHandler, HandlerMode
 
 
 class ClassificationValidator(LearningHandler):

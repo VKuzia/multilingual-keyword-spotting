@@ -7,7 +7,7 @@ import torch
 import torchaudio
 from torchaudio.datasets import SPEECHCOMMANDS
 
-from src.dataloaders.dataloader import DataLoader
+from src.dataloaders import DataLoader
 
 
 class SpeechCommandsMode(Enum):

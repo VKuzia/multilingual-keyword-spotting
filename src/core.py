@@ -1,16 +1,16 @@
 import torch.optim
 
-from src.config.argparser import ArgParser
-from src.config.training_config import TrainingConfig
-from src.config.optimizers import build_optimizer
-from src.models.model import ModelInfoTag, Model, build_model_of
-from src.models.model_loader import ModelIOHelper
-from src.models.speech_commands.core_dataloader import CoreDataLoader, SpeechCommandsMode
-from src.models.speech_commands.core_model import CoreModel2
-from src.paths import PATH_TO_SAVED_MODELS, PATH_TO_SPEECH_COMMANDS
-from src.trainers.handlers.handlers import TimeEpochHandler, StepLossHandler, ModelSaver
-from src.trainers.handlers.validators import ClassificationValidator
-from src.trainers.trainer import Trainer, DefaultTrainer, TrainingParams
+from config import ArgParser
+from config import TrainingConfig
+from config import build_optimizer
+from models import ModelInfoTag, Model, build_model_of
+from models import ModelIOHelper
+from models.speech_commands import CoreDataLoader, SpeechCommandsMode
+from models.speech_commands.classification import CoreModel2
+from trainers.handlers.handlers import TimeEpochHandler, StepLossHandler, ModelSaver
+from trainers.handlers.validators import ClassificationValidator
+from trainers.trainer import Trainer, DefaultTrainer, TrainingParams
+from paths import PATH_TO_SAVED_MODELS, PATH_TO_SPEECH_COMMANDS
 
 args = ArgParser().parse_args()
 config = TrainingConfig().load_json(args.config_path)

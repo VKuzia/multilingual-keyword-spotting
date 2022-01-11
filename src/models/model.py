@@ -4,7 +4,7 @@ from abc import abstractmethod
 import torch.optim
 from torch import nn
 
-from src.utils.decorators import no_none_dataclass
+from utils import no_none_dataclass
 
 
 @no_none_dataclass

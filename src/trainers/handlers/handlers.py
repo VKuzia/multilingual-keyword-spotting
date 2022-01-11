@@ -6,8 +6,8 @@ from typing import Optional
 
 from typing.io import IO
 
-from src.models.model import Model
-from src.models.model_loader import ModelIOHelper
+from src.models import Model
+from src.models import ModelIOHelper
 
 
 class HandlerMode(Enum):
@@ -53,12 +53,12 @@ class TimeEpochHandler(LearningHandler):
         self.output_stream: IO[str] = output_stream
 
     def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
-        if mode == HandlerMode.PRE_EPOCH:
+        if mode.value == HandlerMode.PRE_EPOCH.value:
             self.handle_pre_epoch_job()
-        elif mode == HandlerMode.POST_EPOCH:
+        elif mode.value == HandlerMode.POST_EPOCH.value:
             self.handle_post_epoch_job()
         else:
-            raise ValueError("Unknown HandlerMode.")
+            raise ValueError(f"Unknown HandlerMode {mode.name}.")
 
     def handle_pre_epoch_job(self) -> None:
         """Stores time of epoch learning start"""

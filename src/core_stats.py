@@ -4,13 +4,13 @@ from typing import List
 
 from matplotlib import pyplot as plt
 
-from src.models.model import ModelInfoTag, Model
-from src.models.model_loader import ModelIOHelper
-from src.models.speech_commands.core_dataloader import CoreDataLoader, SpeechCommandsMode
-from src.models.speech_commands.core_model import CoreModel, CoreModel2
-from src.paths import PATH_TO_SAVED_MODELS, PATH_TO_STATS, PATH_TO_SPEECH_COMMANDS
+from models import ModelInfoTag, Model
+from models import ModelIOHelper
+from models.speech_commands import CoreDataLoader, SpeechCommandsMode
+from models.speech_commands.classification import CoreModel2
+from paths import PATH_TO_SAVED_MODELS, PATH_TO_STATS, PATH_TO_SPEECH_COMMANDS
 
-from trainers.handlers.validators import estimate_accuracy
+from trainers.handlers import estimate_accuracy
 
 info_tag: ModelInfoTag = ModelInfoTag("core_embedding", "0_0_2")
 model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
@@ -21,7 +21,7 @@ validation_loader: CoreDataLoader = CoreDataLoader(PATH_TO_SPEECH_COMMANDS,
                                                    SpeechCommandsMode.VALIDATION,
                                                    128)
 
-epochs_range: typing.Iterable = range(1, 201)
+epochs_range: typing.Iterable = range(1, 3)
 train_accuracies: List[float] = []
 validation_accuracies: List[float] = []
 batch_count: int = 10
