@@ -1,0 +1,13 @@
+{
+  "model_name": "core_embedding",
+  "model_version": "0_0_test",
+  "load_model_from_file": true,
+  "load_optimizer_from_file": false,
+  "optimizer": "SGD",
+  "optimizer_parameters": {"learning_rate":  0.01},
+  "checkpoint_version": 4,
+  "batches_per_epoch": 100,
+  "batch_size": 64,
+  "epochs": 2,
+  "batches_per_validation": 10
+}
