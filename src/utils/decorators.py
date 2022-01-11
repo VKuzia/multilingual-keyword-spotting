@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 
 
-def no_none(f):
+def no_none(func):
     """Doesn't allow function to have None args. If None is given, throws ValueError"""
 
     def function(*args, **kwargs):
         if any(arg is None for arg in args):
-            raise ValueError(f'function {f.__name__}: does not accept None args.')
-        return f(*args, **kwargs)
+            raise ValueError(f'function {func.__name__}: does not accept None args.')
+        return func(*args, **kwargs)
 
     return function
 

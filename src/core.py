@@ -1,10 +1,7 @@
 import torch.optim
 
-from config import ArgParser
-from config import TrainingConfig
-from config import build_optimizer
-from models import ModelInfoTag, Model, build_model_of
-from models import ModelIOHelper
+from config import ArgParser, TrainingConfig, build_optimizer
+from models import ModelInfoTag, Model, build_model_of, ModelIOHelper
 from models.speech_commands import CoreDataLoader, SpeechCommandsMode
 from models.speech_commands.classification import CoreModel2
 from trainers.handlers.handlers import TimeEpochHandler, StepLossHandler, ModelSaver

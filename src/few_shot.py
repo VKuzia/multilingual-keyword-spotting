@@ -7,13 +7,13 @@ from models.model_loader import ModelIOHelper
 from models.speech_commands.core_dataloader import SpeechCommandsMode
 from paths import PATH_TO_SPEECH_COMMANDS, PATH_TO_SAVED_MODELS
 
-from src.trainers import TimeEpochHandler, StepLossHandler, ModelSaver
-from src.trainers import ClassificationValidator
+from trainers.handlers import TimeEpochHandler, StepLossHandler, ModelSaver, ClassificationValidator
 from trainers.trainer import DefaultTrainer, Trainer, TrainingParams
 
 info_tag: ModelInfoTag = ModelInfoTag("few_shot", "0_0_2")
 model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
-# embedding: nn.Module = model_io.load_model(CoreModel2, ModelInfoTag("core_embedding", "0_0_2"), 180).kernel
+# embedding: nn.Module = model_io.load_model(CoreModel2, ModelInfoTag("core_embedding", "0_0_2"),
+#                                            180).kernel
 # model: Model = build_model_of(FewShotModel, info_tag, kernel=FewShotKernel(embedding))
 model: Model = model_io.load_model(FewShotModel, info_tag, 39)
 model.optimizer = torch.optim.SGD(model.kernel.parameters(), lr=0.00001)
