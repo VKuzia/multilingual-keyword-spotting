@@ -5,7 +5,7 @@ import torch
 import torchaudio
 
 from src.dataloaders import DataLoader
-from src.dataloaders.dataset import WalkerDataset
+from src.dataloaders.base import WalkerDataset
 
 
 class BaseDataLoader(DataLoader, ABC):
@@ -15,9 +15,7 @@ class BaseDataLoader(DataLoader, ABC):
         Spectrogram(n_fft=97, hop_length=400)  # creates spectrograms of 1x49x40
 
     @abstractmethod
-    def __init__(self, dataset: WalkerDataset, batch_size: int, cuda: bool = True):
-        self.dataset = dataset
-        self.labels = self.dataset.labels
+    def __init__(self, batch_size: int, cuda: bool = True):
         self.batch_size = batch_size
         self.cuda = cuda
 
@@ -51,7 +49,9 @@ class BaseDataLoader(DataLoader, ABC):
 class ClassificationDataLoader(BaseDataLoader):
 
     def __init__(self, dataset: WalkerDataset, batch_size: int, cuda: bool = True):
-        super().__init__(dataset, batch_size, cuda)
+        self.dataset = dataset
+        self.labels = self.dataset.labels
+        super().__init__(batch_size, cuda)
         self.loader = torch.utils.data.DataLoader(
             self.dataset,
             batch_size=self.batch_size,
@@ -81,3 +81,48 @@ class ClassificationDataLoader(BaseDataLoader):
                 return self.dataset.unknown_index
             else:
                 raise ValueError("Unknown label but 'unknown' is not a target category")
+
+
+class FewShotDataLoader(BaseDataLoader):
+
+    def __init__(self, target_dataset: WalkerDataset,
+                 non_target_dataset: WalkerDataset, batch_size: int,
+                 target: str, target_probability: float, cuda: bool = True):
+        super().__init__(batch_size, cuda)
+        self.target = target
+        self.target_dataset = target_dataset
+        self.non_target_dataset = non_target_dataset
+        target_batch_size = int(batch_size * target_probability)
+        non_target_batch_size = batch_size - target_batch_size
+        self._target_loader = torch.utils.data.DataLoader(
+            self.target_dataset,
+            batch_size=target_batch_size,
+            shuffle=True,
+            collate_fn=self.collate_fn,
+            pin_memory=cuda
+        )
+        self._non_target_loader = torch.utils.data.DataLoader(
+            self.non_target_dataset,
+            batch_size=non_target_batch_size,
+            shuffle=True,
+            collate_fn=self.collate_fn,
+            pin_memory=cuda
+        )
+
+    def label_to_index(self, word: str) -> int:
+        return 1 if word == self.target else 0
+
+    def get_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
+        return next(self._yield_batch())
+
+    def _yield_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
+        for (target_data, target_labels), (non_target_data, non_target_labels) in zip(
+                self._target_loader,
+                self._non_target_loader):
+            data = torch.concat((target_data, non_target_data), dim=0)
+            labels = torch.concat((target_labels, non_target_labels), dim=0)
+            transformed_data = self.transform(data).repeat(1, 3, 1, 1)
+            if self.cuda:
+                yield transformed_data.to('cuda'), labels.to('cuda')
+            else:
+                yield transformed_data, labels

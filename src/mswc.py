@@ -2,10 +2,8 @@ import torch.optim
 
 from config import ArgParser, TrainingConfig, build_optimizer
 from models import ModelInfoTag, Model, build_model_of, ModelIOHelper
-from models.speech_commands import DataLoaderMode
-from src.dataloaders.core_dataloader import ClassificationDataLoader
+from src.dataloaders import MonoMSWCDataset, DataLoaderMode, ClassificationDataLoader
 from src.models.mswc.classification.mswc_model import MSWCModel
-from src.models.mswc.mswc_dataset import MonoMSWCDataset
 from trainers.handlers import TimeEpochHandler, StepLossHandler, ModelSaver
 from trainers.handlers import ClassificationValidator
 from trainers.trainer import Trainer, DefaultTrainer, TrainingParams

@@ -1,14 +1,7 @@
 import os
-from typing import Tuple, Callable, List, Optional
+from typing import Callable, List, Optional
 
-import torch
-import torchaudio
-
-from torch import Tensor
-
-from src.dataloaders import DataLoader, DataLoaderMode
-from src.dataloaders.core_dataloader import ClassificationDataLoader
-from src.dataloaders.dataset import WalkerDataset
+from src.dataloaders.base import WalkerDataset, DataLoaderMode
 
 
 def is_word_predicate(word: str) -> Callable[[str], bool]:

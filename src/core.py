@@ -28,6 +28,16 @@ if not config['load_optimizer_from_file']:
                                                        config['optimizer_parameters'])
     model.optimizer = optimizer
 
+
+train_loader: ClassificationDataLoader = \
+    ClassificationDataLoader(MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.TRAINING),
+                             config['batch_size'])
+validation_loader: ClassificationDataLoader = \
+    ClassificationDataLoader(MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.VALIDATION),
+                             config['batch_size'])
+
+
+
 train_loader: CoreDataLoader = \
     CoreDataLoader(PATH_TO_SPEECH_COMMANDS, DataLoaderMode.TRAINING, config['batch_size'])
 validation_loader: CoreDataLoader = \

@@ -1,2 +1,3 @@
-from .dataloader import DataLoader
-from .speech_commands import DataLoaderMode, SpeechCommandsBase, SpeechCommandsDataset
+from .base import DataLoader, DataLoaderMode
+from .dataloaders import ClassificationDataLoader, FewShotDataLoader
+from .datasets import MonoMSWCDataset
