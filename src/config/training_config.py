@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from abc import abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 
 class Config:
@@ -20,8 +20,9 @@ class Config:
         """
         pass
 
-    def __init__(self):
+    def __init__(self, additional_keys: Dict[str, Any] = None):
         self.data = self.default_dict.copy()
+        self.data.update(additional_keys)
 
     def load_json(self, path: str) -> Config:
         """
@@ -56,3 +57,6 @@ class TrainingConfig(Config):
         'epochs': None,
         'specific': None,
     }
+
+    def __init__(self, additional_keys: Dict[str, Any] = None):
+        super().__init__(additional_keys)

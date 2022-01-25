@@ -1,2 +1,2 @@
-from .core_dataloader import CoreDataLoader, SpeechCommandsMode
+from .core_dataloader import CoreDataLoader, DataLoaderMode
 

@@ -9,7 +9,7 @@ from src.models.speech_commands.few_shot import FewShotSpeechCommandsDataLoader
 from src.models.speech_commands.few_shot import FewShotModel
 from models.model import ModelInfoTag, Model
 from models.model_loader import ModelIOHelper
-from models.speech_commands import SpeechCommandsMode
+from models.speech_commands import DataLoaderMode
 from paths import PATH_TO_SPEECH_COMMANDS, PATH_TO_SAVED_MODELS, PATH_TO_STATS
 
 from trainers.handlers import estimate_accuracy
@@ -18,9 +18,9 @@ info_tag: ModelInfoTag = ModelInfoTag("few_shot", "0_0_2")
 model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
 
 train_loader = FewShotSpeechCommandsDataLoader('happy', PATH_TO_SPEECH_COMMANDS,
-                                               SpeechCommandsMode.TRAINING, 128, 0.1)
+                                               DataLoaderMode.TRAINING, 128, 0.1)
 validation_loader = FewShotSpeechCommandsDataLoader('happy', PATH_TO_SPEECH_COMMANDS,
-                                                    SpeechCommandsMode.VALIDATION,
+                                                    DataLoaderMode.VALIDATION,
                                                     128, 0.1)
 
 epochs_range: typing.Iterable = range(1, 51)

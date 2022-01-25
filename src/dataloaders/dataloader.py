@@ -1,7 +1,15 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Tuple
 
 import torch
+
+
+class DataLoaderMode(Enum):
+    """Specifies the part of dataset to use in loader."""
+    TRAINING = 0
+    VALIDATION = 1
+    TESTING = 2
 
 
 class DataLoader(ABC):

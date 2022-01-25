@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 from models import ModelInfoTag, Model
 from models import ModelIOHelper
-from models.speech_commands import CoreDataLoader, SpeechCommandsMode
+from models.speech_commands import CoreDataLoader, DataLoaderMode
 from models.speech_commands.classification import CoreModel2
 from paths import PATH_TO_SAVED_MODELS, PATH_TO_STATS, PATH_TO_SPEECH_COMMANDS
 
@@ -16,9 +16,9 @@ info_tag: ModelInfoTag = ModelInfoTag("core_embedding", "0_0_2")
 model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
 
 train_loader: CoreDataLoader = CoreDataLoader(PATH_TO_SPEECH_COMMANDS,
-                                              SpeechCommandsMode.TRAINING, 128)
+                                              DataLoaderMode.TRAINING, 128)
 validation_loader: CoreDataLoader = CoreDataLoader(PATH_TO_SPEECH_COMMANDS,
-                                                   SpeechCommandsMode.VALIDATION,
+                                                   DataLoaderMode.VALIDATION,
                                                    128)
 
 epochs_range: typing.Iterable = range(1, 3)

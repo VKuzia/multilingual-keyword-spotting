@@ -1,7 +1,7 @@
 from typing import Tuple
 
 import torch
-from src.dataloaders.speech_commands import SpeechCommandsBase, SpeechCommandsMode, \
+from src.dataloaders.speech_commands import SpeechCommandsBase, DataLoaderMode, \
     SpeechCommandsDataset
 
 
@@ -12,7 +12,7 @@ class CoreDataLoader(SpeechCommandsBase):
     https://pytorch.org/tutorials/intermediate/speech_command_recognition_with_torchaudio.html
     """
 
-    def __init__(self, path: str, mode: SpeechCommandsMode, batch_size: int, cuda: bool = True):
+    def __init__(self, path: str, mode: DataLoaderMode, batch_size: int, cuda: bool = True):
         super().__init__()
         self.dataset = SpeechCommandsDataset(path, mode)
         self.batch_size = batch_size

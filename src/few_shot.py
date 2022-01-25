@@ -4,7 +4,7 @@ from src.models.speech_commands.few_shot import FewShotSpeechCommandsDataLoader
 from src.models.speech_commands.few_shot import FewShotModel
 from models.model import ModelInfoTag, Model
 from models.model_loader import ModelIOHelper
-from models.speech_commands.core_dataloader import SpeechCommandsMode
+from models.speech_commands.core_dataloader import DataLoaderMode
 from paths import PATH_TO_SPEECH_COMMANDS, PATH_TO_SAVED_MODELS
 
 from trainers.handlers import TimeEpochHandler, StepLossHandler, ModelSaver, ClassificationValidator
@@ -19,9 +19,9 @@ model: Model = model_io.load_model(FewShotModel, info_tag, 39)
 model.optimizer = torch.optim.SGD(model.kernel.parameters(), lr=0.00001)
 
 train_loader = FewShotSpeechCommandsDataLoader('happy', PATH_TO_SPEECH_COMMANDS,
-                                               SpeechCommandsMode.TRAINING, 128, 0.1)
+                                               DataLoaderMode.TRAINING, 128, 0.1)
 validation_loader = FewShotSpeechCommandsDataLoader('happy', PATH_TO_SPEECH_COMMANDS,
-                                                    SpeechCommandsMode.VALIDATION,
+                                                    DataLoaderMode.VALIDATION,
                                                     128, 0.1)
 
 time_measure_handler: TimeEpochHandler = TimeEpochHandler()

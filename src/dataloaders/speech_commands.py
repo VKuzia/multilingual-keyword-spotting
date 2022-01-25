@@ -8,13 +8,7 @@ import torchaudio
 from torchaudio.datasets import SPEECHCOMMANDS
 
 from src.dataloaders import DataLoader
-
-
-class SpeechCommandsMode(Enum):
-    """Specifies the part of dataset to use in loader."""
-    TRAINING = 0
-    VALIDATION = 1
-    TESTING = 2
+from src.dataloaders.dataloader import DataLoaderMode
 
 
 class SpeechCommandsDataset(SPEECHCOMMANDS):
@@ -24,15 +18,15 @@ class SpeechCommandsDataset(SPEECHCOMMANDS):
     https://pytorch.org/tutorials/intermediate/speech_command_recognition_with_torchaudio.html
     """
 
-    def __init__(self, path: str, subset: SpeechCommandsMode,
+    def __init__(self, path: str, subset: DataLoaderMode,
                  predicate: Callable[[str], bool] = lambda label: True):
         super().__init__(path, download=False, subset=str(subset.name).lower())
 
-        if subset == SpeechCommandsMode.VALIDATION:
+        if subset == DataLoaderMode.VALIDATION:
             self._walker = self.load_list("validation_list.txt", predicate)
-        elif subset == SpeechCommandsMode.TESTING:
+        elif subset == DataLoaderMode.TESTING:
             self._walker = self.load_list("testing_list.txt", predicate)
-        elif subset == SpeechCommandsMode.TRAINING:
+        elif subset == DataLoaderMode.TRAINING:
             excludes = self.load_list("validation_list.txt") + self.load_list("testing_list.txt")
             excludes = set(excludes)
             self._walker = [w for w in self._walker if
