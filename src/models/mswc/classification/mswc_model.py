@@ -19,10 +19,10 @@ class MSWCModel(Model):
         return torch.optim.SGD(kernel.parameters(), lr=0.1)
 
     @staticmethod
-    def get_default_kernel(kernel_args: Optional[Dict[str, Any]] = None) -> nn.Module:
-        inspect_keys(kernel_args, ["output_channels"])
+    def get_default_kernel(args: Optional[Dict[str, Any]] = None) -> nn.Module:
+        inspect_keys(args, ["output_channels"])
         backbone: nn.Module = torchvision.models.efficientnet_b2(pretrained=False)
-        return CoreKernel(backbone, kernel_args["output_channels"])
+        return CoreKernel(backbone, args["output_channels"])
 
     @staticmethod
     def get_default_loss_function() -> torch.nn.modules.Module:

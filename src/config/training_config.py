@@ -22,7 +22,8 @@ class Config:
 
     def __init__(self, additional_keys: Dict[str, Any] = None):
         self.data = self.default_dict.copy()
-        self.data.update(additional_keys)
+        if additional_keys:
+            self.data.update(additional_keys)
 
     def load_json(self, path: str) -> Config:
         """
