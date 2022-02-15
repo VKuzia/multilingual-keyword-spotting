@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Tuple, List
 
 import torch
 import torchaudio
 
 from src.dataloaders import DataLoader
-from src.dataloaders.base import WalkerDataset
+from src.dataloaders import WalkerDataset, Dataset
 
 
 class BaseDataLoader(DataLoader, ABC):
@@ -48,7 +48,7 @@ class BaseDataLoader(DataLoader, ABC):
 
 class ClassificationDataLoader(BaseDataLoader):
 
-    def __init__(self, dataset: WalkerDataset, batch_size: int, cuda: bool = True):
+    def __init__(self, dataset: Dataset, batch_size: int, cuda: bool = True):
         self.dataset = dataset
         self.labels = self.dataset.labels
         super().__init__(batch_size, cuda)
@@ -72,6 +72,9 @@ class ClassificationDataLoader(BaseDataLoader):
             else:
                 yield transformed_data, labels
 
+    def get_labels(self) -> List[str]:
+        return self.dataset.labels
+
     def label_to_index(self, word: str) -> int:
         """Returns the index of the given word"""
         if word in self.labels:
@@ -85,8 +88,11 @@ class ClassificationDataLoader(BaseDataLoader):
 
 class FewShotDataLoader(BaseDataLoader):
 
-    def __init__(self, target_dataset: WalkerDataset,
-                 non_target_dataset: WalkerDataset, batch_size: int,
+    def get_labels(self) -> List[str]:
+        return ['unknown', 'target']
+
+    def __init__(self, target_dataset: Dataset,
+                 non_target_dataset: Dataset, batch_size: int,
                  target: str, target_probability: float, cuda: bool = True):
         super().__init__(batch_size, cuda)
         self.target = target

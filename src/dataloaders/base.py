@@ -18,9 +18,7 @@ class DataLoaderMode(Enum):
 class DataLoader(ABC):
     """
     Base class for every data loading entity in the project.
-    Must provide load_data and get_batch functions to be used while learning.
-    I haven't came up with beautiful structure of this one yet,
-    so it's an interface with get_batch function for now.
+    Must provide get_batch function to be used while learning.
     """
 
     @abstractmethod
@@ -30,8 +28,32 @@ class DataLoader(ABC):
         :return: tuple of (X, y), where X is the input data batch and y is the labels batch
         """
 
+    @abstractmethod
+    def get_labels(self) -> List[str]:
+        pass
 
-class WalkerDataset(ABC):
+
+class Dataset(ABC):
+
+    @abstractmethod
+    def __getitem__(self, n: int) -> Tuple[Tensor, int, str]:
+        pass
+
+    @abstractmethod
+    def __len__(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def unknown_index(self) -> Optional[int]:
+        pass
+
+    @property
+    @abstractmethod
+    def labels(self) -> List[str]:
+        pass
+
+class WalkerDataset(Dataset, ABC):
 
     @property
     @abstractmethod
@@ -59,16 +81,6 @@ class WalkerDataset(ABC):
 
     @abstractmethod
     def extract_label_full(self, path_to_clip: str) -> str:
-        pass
-
-    @property
-    @abstractmethod
-    def labels(self) -> List[str]:
-        pass
-
-    @property
-    @abstractmethod
-    def unknown_index(self) -> Optional[int]:
         pass
 
     @abstractmethod
@@ -104,3 +116,35 @@ class WalkerDataset(ABC):
 
     def __len__(self) -> int:
         return len(self._walker)
+
+
+class MultiWalkerDataset(Dataset):
+
+    @property
+    def unknown_index(self) -> Optional[int]:
+        return None
+
+    @property
+    def labels(self) -> List[str]:
+        return self._labels
+
+    def __init__(self, datasets: List[Dataset]):
+        if not datasets:
+            raise ValueError('Empty datasets creation is not allowed.')
+        self._datasets = datasets
+        self._lengths = [len(dataset) for dataset in datasets]
+        self._len = sum(self._lengths)
+        self._labels = sum([dataset.labels for dataset in datasets], [])
+
+    def __len__(self) -> int:
+        return self._len
+
+    def __getitem__(self, n: int) -> Tuple[Tensor, int, str]:
+        if n >= self._len or n < 0:
+            raise IndexError(f'Could not produce item of index {n}')
+        index: int = 0
+        aggregated: int = 0
+        while index < len(self._lengths) and n - aggregated >= self._lengths[index]:
+            aggregated += self._lengths[index]
+            index += 1
+        return self._datasets[index][n - aggregated]

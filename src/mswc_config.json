@@ -7,7 +7,7 @@
   "optimizer": "SGD",
   "optimizer_parameters": {"learning_rate":  0.001},
   "checkpoint_version": 1,
-  "batches_per_epoch": 1000,
+  "batches_per_epoch": 100,
   "batch_size": 64,
   "epochs": 20,
   "batches_per_validation": 50

@@ -4,7 +4,7 @@ from abc import abstractmethod
 import torch.optim
 from torch import nn
 
-from utils import no_none_dataclass
+from src.utils import no_none_dataclass
 
 
 @no_none_dataclass
@@ -106,7 +106,7 @@ def build_model_of(model_class: Type[Model], info_tag: ModelInfoTag, *,
                    cuda: bool = True) -> Model:
     """Returns a default (initial) model of a given class"""
     kernel: nn.Module = kernel if kernel is not None else model_class.get_default_kernel(
-        args=kernel_args)
+        **kernel_args)
     optimizer: torch.optim.Optimizer = \
         optimizer if optimizer is not None else model_class.get_default_optimizer(kernel)
     model: Model = Model(kernel, optimizer, model_class.get_default_loss_function(), info_tag, cuda)
