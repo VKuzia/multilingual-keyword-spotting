@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from src.models import Model, CoreKernel, CoreModel2
+from src.models import Model, CoreKernel, CoreModel
 
 
 class FewShotKernel(nn.Module):
@@ -34,7 +34,7 @@ class FewShotModel(Model):
 
     @staticmethod
     def get_default_kernel(**kwargs) -> nn.Module:
-        return FewShotKernel(CoreModel2.get_default_core_kernel(**kwargs))
+        return FewShotKernel(CoreModel.get_default_core_kernel(**kwargs))
 
     @staticmethod
     def get_default_loss_function() -> torch.nn.modules.Module:

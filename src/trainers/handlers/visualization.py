@@ -21,10 +21,6 @@ class Printer:
         self.epochs_progressbar.update()
         self.step_progressbar.reset(total=self.batches_num)
 
-    def update_loss(self, loss: float):
-        """Prints model's last training loss"""
-        self.step_progressbar.set_postfix_str("Loss: {:.4f}".format(loss))
-
     def update_accuracy(self, val_accuracy: float, train_accuracy: float):
         """Prints model's accuracy values"""
         self.epochs_progressbar.set_postfix_str(
@@ -46,6 +42,5 @@ class PrinterHandler(LearningHandler):
                                          model.learning_info.train_accuracy_history[-1])
         elif mode == HandlerMode.STEP:
             self.printer.update_step()
-            self.printer.update_loss(model.learning_info.last_loss)
         else:
             raise ValueError(f"Unknown HandlerMode {mode.name}.")

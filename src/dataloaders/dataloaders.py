@@ -49,37 +49,32 @@ class BaseDataLoader(DataLoader, ABC):
 class ClassificationDataLoader(BaseDataLoader):
     """Implements batch loading for given Dataset instance. Each word has it's own label category"""
 
-    def __init__(self, dataset: Dataset, batch_size: int, cuda: bool = True):
+    def __init__(self, dataset: Dataset, batch_size: int, cuda: bool = True, workers: int = 0):
         self.dataset = dataset
         self.labels = self.dataset.labels
+        self.labels_map = {word: index for index, word in enumerate(self.labels)}
         super().__init__(batch_size, cuda)
         self.loader = torch.utils.data.DataLoader(
             self.dataset,
             batch_size=self.batch_size,
             shuffle=True,
             collate_fn=self.collate_fn,
-            pin_memory=cuda
+            pin_memory=cuda,
+            num_workers=workers
         )
+        self.loader_iter = iter(self.loader)
 
     def get_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        return next(self._yield_batch())
-
-    def _yield_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Takes next batch of the self.loader, transforms it and yields."""
-        for data, labels in self.loader:
-            transformed_data = self.transform(data).repeat(1, 3, 1, 1)
-            if self.cuda:
-                yield transformed_data.to('cuda'), labels.to('cuda')
-            else:
-                yield transformed_data, labels
+        data, labels = next(self.loader_iter)
+        return self.transform(data).to('cuda'), labels.to('cuda')
 
     def get_labels(self) -> List[str]:
         return self.dataset.labels
 
     def label_to_index(self, word: str) -> int:
         """Returns the index of the given word"""
-        if word in self.labels:
-            return self.labels.index(word)
+        if word in self.labels_map.keys():
+            return self.labels_map[word]
         else:
             if self.dataset.unknown_index:
                 return self.dataset.unknown_index
@@ -96,7 +91,7 @@ class FewShotDataLoader(BaseDataLoader):
 
     def __init__(self, target_dataset: Dataset,
                  non_target_dataset: Dataset, batch_size: int,
-                 target: str, target_probability: float, cuda: bool = True):
+                 target: str, target_probability: float, cuda: bool = True, workers: int = 0):
         super().__init__(batch_size, cuda)
         self.target = target
         self.target_dataset = target_dataset
@@ -108,30 +103,26 @@ class FewShotDataLoader(BaseDataLoader):
             batch_size=target_batch_size,
             shuffle=True,
             collate_fn=self.collate_fn,
-            pin_memory=cuda
+            pin_memory=cuda,
+            num_workers=workers
         )
         self._non_target_loader = torch.utils.data.DataLoader(
             self.non_target_dataset,
             batch_size=non_target_batch_size,
             shuffle=True,
             collate_fn=self.collate_fn,
-            pin_memory=cuda
+            pin_memory=cuda,
+            num_workers=workers
         )
+        self.target_loader_iter = iter(self._target_loader)
+        self.non_target_loader_iter = iter(self._non_target_loader)
 
     def label_to_index(self, word: str) -> int:
         return 1 if word == self.target else 0
 
     def get_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        return next(self._yield_batch())
-
-    def _yield_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        for (target_data, target_labels), (non_target_data, non_target_labels) in zip(
-                self._target_loader,
-                self._non_target_loader):
-            data = torch.concat((target_data, non_target_data), dim=0)
-            labels = torch.concat((target_labels, non_target_labels), dim=0)
-            transformed_data = self.transform(data).repeat(1, 3, 1, 1)
-            if self.cuda:
-                yield transformed_data.to('cuda'), labels.to('cuda')
-            else:
-                yield transformed_data, labels
+        target_data, target_labels = next(self.target_loader_iter)
+        non_target_data, non_target_labels = next(self.non_target_loader_iter)
+        data = torch.concat((target_data, non_target_data), dim=0)
+        labels = torch.concat((target_labels, non_target_labels), dim=0)
+        return data.to('cuda'), labels.to('cuda')

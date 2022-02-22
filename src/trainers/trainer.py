@@ -84,6 +84,6 @@ class DefaultTrainer(Trainer):
             model.optimizer.zero_grad()
             loss.backward()
             model.optimizer.step()
-            model.learning_info.last_loss = loss.item()
+            # model.learning_info.last_loss = loss.item()
             for handler in after_step_handlers:
                 handler.handle(model, mode=HandlerMode.STEP)

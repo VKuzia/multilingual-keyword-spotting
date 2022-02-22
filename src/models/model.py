@@ -25,7 +25,6 @@ class ModelLearningInfo:
     Contains useful information for printing model's stats.
     """
     epochs_trained: int = 0
-    last_loss: float = 0.0
     val_accuracy_history: List[float] = field(default_factory=list)
     train_accuracy_history: List[float] = field(default_factory=list)
 
