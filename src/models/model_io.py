@@ -94,9 +94,10 @@ class ModelIOHelper:
         torch.save(checkpoint.kernel_state_dict, f"{final_path}/{KERNEL_STATE_DICT_NAME}")
         torch.save(checkpoint.optimizer_state_dict, f"{final_path}/{OPTIMIZER_STATE_DICT_NAME}")
         with open(f"{final_path}/{INFO_NAME}", "w") as info_file:
-            info_file.write(json.dumps(checkpoint.info_tag, default=lambda o: o.__dict__))
+            info_file.write(json.dumps(checkpoint.info_tag, default=lambda o: o.__dict__, indent=1))
         with open(f"{final_path}/{LEARNING_INFO_NAME}", "w") as info_file:
-            info_file.write(json.dumps(checkpoint.learning_info, default=lambda o: o.__dict__))
+            info_file.write(
+                json.dumps(checkpoint.learning_info, default=lambda o: o.__dict__, indent=1))
 
     @staticmethod
     def get_dir(model_info: ModelInfoTag, checkpoint_version: int) -> str:

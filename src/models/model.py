@@ -1,3 +1,4 @@
+from dataclasses import field
 from typing import Dict, Any, Type, Optional, List
 from abc import abstractmethod
 
@@ -7,7 +8,7 @@ from torch import nn
 from src.utils import no_none_dataclass
 
 
-@no_none_dataclass
+@no_none_dataclass()
 class ModelInfoTag:
     """
     Dataclass containing information on the text description of the model.
@@ -17,7 +18,7 @@ class ModelInfoTag:
     version_tag: str
 
 
-@no_none_dataclass
+@no_none_dataclass(iterable_ok=True)
 class ModelLearningInfo:
     """
     Dataclass containing information about model learning progress.
@@ -25,11 +26,11 @@ class ModelLearningInfo:
     """
     epochs_trained: int = 0
     last_loss: float = 0.0
-    val_accuracy: float = 0.0
-    train_accuracy: float = 0.0
+    val_accuracy_history: List[float] = field(default_factory=list)
+    train_accuracy_history: List[float] = field(default_factory=list)
 
 
-@no_none_dataclass
+@no_none_dataclass()
 class ModelCheckpoint:
     """
     Dataclass containing model's state to be saved.

@@ -7,7 +7,7 @@ from src.utils import no_none
 from src.utils import inspect_keys
 
 
-@no_none
+@no_none()
 def build_optimizer(model: Model, name: str,
                     params: Optional[Dict[str, Any]]) -> torch.optim.Optimizer:
     """

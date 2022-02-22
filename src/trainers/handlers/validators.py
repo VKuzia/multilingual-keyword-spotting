@@ -28,9 +28,9 @@ class ClassificationValidator(LearningHandler):
         """
         accuracy = estimate_accuracy(model, self.data_loader, self.batch_count)
         if self.validation_mode.value == ValidationMode.VALIDATION.value:
-            model.learning_info.val_accuracy = accuracy
+            model.learning_info.val_accuracy_history.append(accuracy)
         elif self.validation_mode.value == ValidationMode.TRAINING.value:
-            model.learning_info.train_accuracy = accuracy
+            model.learning_info.train_accuracy_history.append(accuracy)
 
 
 def estimate_accuracy(model: Model, data_loader: DataLoader, batch_count: int) -> float:

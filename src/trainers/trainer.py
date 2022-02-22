@@ -7,7 +7,7 @@ from src.models import Model
 from src.utils import no_none_dataclass
 
 
-@no_none_dataclass
+@no_none_dataclass()
 class TrainingParams:
     """
     Dataclass containing parameters used in a network training loop.
