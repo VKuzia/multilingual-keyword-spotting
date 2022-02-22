@@ -22,8 +22,7 @@ class MonoMSWCDataset(WalkerDataset):
 
     @property
     def validation_list(self) -> str:
-        # TODO: VALIDATION
-        return f"{self.language}_train.txt"
+        return f"{self.language}_dev.txt"
 
     @property
     def test_list(self) -> str:

@@ -14,7 +14,7 @@ from src.paths import PATH_TO_MSWC, PATH_TO_MSWC_WAV
 
 CONVERT_ALL = True
 N_SAMPLES_TO_CONVERT = 20
-LANGUAGES_LIST = ["ru"]
+LANGUAGES_LIST = ["pl"]
 
 src = Path(PATH_TO_MSWC)
 dest = Path(PATH_TO_MSWC_WAV)

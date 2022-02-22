@@ -39,65 +39,6 @@ class LearningHandler(ABC):
         """
 
 
-class TimeEpochHandler(LearningHandler):
-    """
-    Implementation of LearningHandler used to measure time elapsed within one epoch training.
-    To be work fine must to be both in pre_epoch_handlers and post_epoch_handlers
-    (see trainers.Trainer).
-    Should be the last in pre_epoch_handlers and first in post_epoch_handlers to measure train time
-    without other handlers jobs.
-    """
-
-    def __init__(self, output_stream: IO[str] = sys.stdout):
-        self.start_time: Optional[float] = None
-        self.output_stream: IO[str] = output_stream
-
-    def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
-        if mode.value == HandlerMode.PRE_EPOCH.value:
-            self.handle_pre_epoch_job()
-        elif mode.value == HandlerMode.POST_EPOCH.value:
-            self.handle_post_epoch_job()
-        else:
-            raise ValueError(f"Unknown HandlerMode {mode.name}.")
-
-    def handle_pre_epoch_job(self) -> None:
-        """Stores time of epoch learning start"""
-        self.start_time = time.time()
-
-    def handle_post_epoch_job(self) -> None:
-        """
-        Calculates time elapsed while training last epoch.
-        handle_pre_epoch_job call must be performed before handle_post_epoch_job.
-        :raises: TypeError if self.start_time is None, meaning start time is not measured properly.
-        :return: None
-        """
-        if self.start_time is None:
-            raise TypeError("Couldn't measure time as start time is None.")
-        delta: float = time.time() - self.start_time
-        self.output_stream.write("Time for epoch: {:.4f}\n".format(delta))
-        self.output_stream.flush()
-        self.start_time = None
-
-
-class StepLossHandler(LearningHandler):
-    """
-    Implementation of LearningHandler which is used to output last model's loss
-    or other meaningful information on one step of learning.
-    """
-
-    def __init__(self, output_stream: IO[str] = sys.stdout):
-        self.output_stream = output_stream
-        self.step_num = 0
-
-    def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
-        """Writes the last model's lost to self.output_stream"""
-        self.step_num += 1
-        self.output_stream.write("[{}: {}] Loss for batch: {:.6f}\n"
-                                 .format(model.learning_info.epochs_trained + 1, self.step_num,
-                                         model.learning_info.last_loss))
-        self.output_stream.flush()
-
-
 class ModelSaver(LearningHandler):
     """
     Saves the model one time in epoch_rate epochs. Uses ModelIOHelper instance provided.

@@ -1,4 +1,4 @@
-from typing import Dict, Any, Type, Optional
+from typing import Dict, Any, Type, Optional, List
 from abc import abstractmethod
 
 import torch.optim
@@ -25,6 +25,8 @@ class ModelLearningInfo:
     """
     epochs_trained: int = 0
     last_loss: float = 0.0
+    val_accuracy: float = 0.0
+    train_accuracy: float = 0.0
 
 
 @no_none_dataclass

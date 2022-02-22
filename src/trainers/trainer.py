@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List
+from typing import List, Optional
 
 from src.dataloaders import DataLoader
 from src.trainers.handlers import LearningHandler, HandlerMode
@@ -27,10 +27,12 @@ class Trainer:
 
     def __init__(self, pre_epoch_handlers: List[LearningHandler] = None,
                  after_step_handlers: List[LearningHandler] = None,
-                 post_epoch_handlers: List[LearningHandler] = None):
+                 post_epoch_handlers: List[LearningHandler] = None,
+                 silent: bool = False):
         self.pre_epoch_handlers = pre_epoch_handlers
         self.after_step_handlers = after_step_handlers
         self.post_epoch_handlers = post_epoch_handlers
+        self.silent = silent
 
     def train(self, model: Model, data_loader: DataLoader, params: TrainingParams) -> None:
         """
@@ -50,7 +52,6 @@ class Trainer:
 
             for handler in self.post_epoch_handlers:
                 handler.handle(model, mode=HandlerMode.POST_EPOCH)
-
             model.learning_info.epochs_trained += 1
 
     @abstractmethod

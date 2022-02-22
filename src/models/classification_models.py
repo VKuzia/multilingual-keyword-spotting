@@ -54,7 +54,7 @@ class CoreModel(Model):
 
     @staticmethod
     def get_default_kernel(**kwargs) -> nn.Module:
-        return CoreModel.get_default_core_kernel()
+        return CoreModel.get_default_core_kernel(**kwargs)
 
     @staticmethod
     def get_default_loss_function() -> torch.nn.modules.Module:

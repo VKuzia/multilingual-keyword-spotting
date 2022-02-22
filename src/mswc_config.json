@@ -1,14 +1,14 @@
 {
-  "model_name": "mswc_embedding",
-  "model_version": "0_0_test_espana",
-  "language": "es",
+  "model_name": "test",
+  "model_version": "0_0_0",
+  "language": "pl",
   "load_model_from_file": false,
   "load_optimizer_from_file": false,
   "optimizer": "SGD",
-  "optimizer_parameters": {"learning_rate":  0.001},
-  "checkpoint_version": 1,
+  "optimizer_parameters": {"learning_rate":  0.01},
+  "checkpoint_version": 5,
   "batches_per_epoch": 100,
   "batch_size": 64,
   "epochs": 20,
-  "batches_per_validation": 50
+  "batches_per_validation": 100
 }

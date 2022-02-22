@@ -5,8 +5,8 @@ from tqdm import tqdm
 
 from src.paths import PATH_TO_MSWC_WAV, PATH_TO_MSWC
 
-LANGUAGES_LIST = ["en", "es"]
-CSV_LIST = ["test.csv", "train.csv"]
+LANGUAGES_LIST = ["pl"]
+CSV_LIST = ["test.csv", "train.csv", "dev.csv"]
 
 src = Path(PATH_TO_MSWC)
 dest = Path(PATH_TO_MSWC_WAV)
