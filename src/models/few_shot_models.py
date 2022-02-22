@@ -1,8 +1,7 @@
 import torch
 from torch import nn
 
-from src.models import Model
-from src.models.speech_commands.classification import CoreKernel, CoreModel2
+from src.models import Model, CoreKernel, CoreModel2
 
 
 class FewShotKernel(nn.Module):
@@ -34,8 +33,8 @@ class FewShotModel(Model):
         return torch.optim.SGD(kernel.parameters(), lr=0.1)
 
     @staticmethod
-    def get_default_kernel() -> nn.Module:
-        return FewShotKernel(CoreModel2.get_default_core_kernel())
+    def get_default_kernel(**kwargs) -> nn.Module:
+        return FewShotKernel(CoreModel2.get_default_core_kernel(**kwargs))
 
     @staticmethod
     def get_default_loss_function() -> torch.nn.modules.Module:

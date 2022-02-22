@@ -7,7 +7,7 @@ from src.utils import no_none
 from src.utils import inspect_keys
 
 
-@no_none
+@no_none()
 def build_optimizer(model: Model, name: str,
                     params: Optional[Dict[str, Any]]) -> torch.optim.Optimizer:
     """
@@ -17,5 +17,8 @@ def build_optimizer(model: Model, name: str,
     if name == 'SGD':
         inspect_keys(params, ['learning_rate'])
         return torch.optim.SGD(model.kernel.parameters(), lr=params['learning_rate'])
+    elif name == 'Adam':
+        inspect_keys(params, ['learning_rate'])
+        return torch.optim.Adam(model.kernel.parameters(), lr=params['learning_rate'])
     else:
         raise ValueError(f'Unknown optimizer type {name}.')

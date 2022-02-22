@@ -1,13 +1,14 @@
-from typing import Dict, Any, Type, Optional
+from dataclasses import field
+from typing import Dict, Any, Type, Optional, List
 from abc import abstractmethod
 
 import torch.optim
 from torch import nn
 
-from utils import no_none_dataclass
+from src.utils import no_none_dataclass
 
 
-@no_none_dataclass
+@no_none_dataclass()
 class ModelInfoTag:
     """
     Dataclass containing information on the text description of the model.
@@ -17,7 +18,7 @@ class ModelInfoTag:
     version_tag: str
 
 
-@no_none_dataclass
+@no_none_dataclass(iterable_ok=True)
 class ModelLearningInfo:
     """
     Dataclass containing information about model learning progress.
@@ -25,9 +26,11 @@ class ModelLearningInfo:
     """
     epochs_trained: int = 0
     last_loss: float = 0.0
+    val_accuracy_history: List[float] = field(default_factory=list)
+    train_accuracy_history: List[float] = field(default_factory=list)
 
 
-@no_none_dataclass
+@no_none_dataclass()
 class ModelCheckpoint:
     """
     Dataclass containing model's state to be saved.
@@ -90,7 +93,7 @@ class Model:
 
     @staticmethod
     @abstractmethod
-    def get_default_kernel() -> nn.Module:
+    def get_default_kernel(args: Optional[Dict[str, Any]] = None) -> nn.Module:
         """Returns kernel (nn.Module) to construct initial models of given class with"""
 
     @staticmethod
@@ -100,11 +103,13 @@ class Model:
 
 
 def build_model_of(model_class: Type[Model], info_tag: ModelInfoTag, *,
+                   kernel_args: Optional[Dict[str, Any]] = None,
                    kernel: Optional[nn.Module] = None,
                    optimizer: Optional[torch.optim.Optimizer] = None,
                    cuda: bool = True) -> Model:
     """Returns a default (initial) model of a given class"""
-    kernel: nn.Module = kernel if kernel is not None else model_class.get_default_kernel()
+    kernel: nn.Module = kernel if kernel is not None else model_class.get_default_kernel(
+        **kernel_args)
     optimizer: torch.optim.Optimizer = \
         optimizer if optimizer is not None else model_class.get_default_optimizer(kernel)
     model: Model = Model(kernel, optimizer, model_class.get_default_loss_function(), info_tag, cuda)

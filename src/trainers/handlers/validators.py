@@ -1,5 +1,4 @@
-import sys
-from typing import IO
+from enum import Enum
 
 import torch
 
@@ -8,14 +7,19 @@ from src.models import Model
 from src.trainers.handlers import LearningHandler, HandlerMode
 
 
+class ValidationMode(Enum):
+    VALIDATION = 0
+    TRAINING = 1
+
+
 class ClassificationValidator(LearningHandler):
     """Performs accuracy estimation on a set of data provided via data_loader"""
 
     def __init__(self, data_loader: DataLoader, batch_count: int,
-                 output_stream: IO[str] = sys.stdout):
+                 mode: ValidationMode = ValidationMode.VALIDATION):
         self.data_loader = data_loader
         self.batch_count = batch_count
-        self.output_stream = output_stream
+        self.validation_mode = mode
 
     def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
         """
@@ -23,8 +27,10 @@ class ClassificationValidator(LearningHandler):
         and writes the final accuracy to self.output_stream
         """
         accuracy = estimate_accuracy(model, self.data_loader, self.batch_count)
-        self.output_stream.write("Accuracy on validation set: {:.5f}\n".format(accuracy))
-        self.output_stream.flush()
+        if self.validation_mode.value == ValidationMode.VALIDATION.value:
+            model.learning_info.val_accuracy_history.append(accuracy)
+        elif self.validation_mode.value == ValidationMode.TRAINING.value:
+            model.learning_info.train_accuracy_history.append(accuracy)
 
 
 def estimate_accuracy(model: Model, data_loader: DataLoader, batch_count: int) -> float:

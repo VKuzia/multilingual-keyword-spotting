@@ -1,2 +1,0 @@
-from .few_shot_dataloader import FewShotSpeechCommandsDataLoader
-from .few_shot_model import FewShotModel

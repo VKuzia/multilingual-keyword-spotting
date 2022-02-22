@@ -53,17 +53,17 @@ class CoreModel(Model):
         return torch.optim.SGD(kernel.parameters(), lr=0.1)
 
     @staticmethod
-    def get_default_kernel() -> nn.Module:
-        return CoreModel.get_default_core_kernel()
+    def get_default_kernel(**kwargs) -> nn.Module:
+        return CoreModel.get_default_core_kernel(**kwargs)
 
     @staticmethod
     def get_default_loss_function() -> torch.nn.modules.Module:
         return torch.nn.NLLLoss()
 
     @staticmethod
-    def get_default_core_kernel() -> CoreKernel:
+    def get_default_core_kernel(**kwargs) -> CoreKernel:
         backbone: nn.Module = torchvision.models.efficientnet_b0(pretrained=False)
-        return CoreKernel(backbone, 21)
+        return CoreKernel(backbone, kwargs['output_channels'])
 
 
 class CoreModel2(Model):
@@ -77,15 +77,15 @@ class CoreModel2(Model):
         return torch.optim.SGD(kernel.parameters(), lr=0.1)
 
     @staticmethod
-    def get_default_kernel() -> nn.Module:
+    def get_default_kernel(**kwargs) -> nn.Module:
         backbone: nn.Module = torchvision.models.efficientnet_b2(pretrained=False)
-        return CoreKernel(backbone, 21)
+        return CoreKernel(backbone, kwargs['output_channels'])
 
     @staticmethod
     def get_default_loss_function() -> torch.nn.modules.Module:
         return torch.nn.NLLLoss()
 
     @staticmethod
-    def get_default_core_kernel() -> CoreKernel:
+    def get_default_core_kernel(**kwargs) -> CoreKernel:
         backbone: nn.Module = torchvision.models.efficientnet_b2(pretrained=False)
-        return CoreKernel(backbone, 21)
+        return CoreKernel(backbone, kwargs['output_channels'])
