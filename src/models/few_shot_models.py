@@ -1,8 +1,7 @@
 import torch
 from torch import nn
 
-from src.models import CoreKernel, CoreModel2
-from src.models import Model
+from src.models import Model, CoreKernel, CoreModel2
 
 
 class FewShotKernel(nn.Module):

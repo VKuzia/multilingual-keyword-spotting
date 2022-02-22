@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from abc import abstractmethod
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional
 
 
 class Config:

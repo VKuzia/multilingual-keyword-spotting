@@ -1,6 +1,4 @@
-import sys
 from enum import Enum
-from typing import IO
 
 import torch
 

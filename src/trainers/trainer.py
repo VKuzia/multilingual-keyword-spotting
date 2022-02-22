@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Optional
+from typing import List
 
 from src.dataloaders import DataLoader
 from src.trainers.handlers import LearningHandler, HandlerMode

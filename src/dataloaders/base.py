@@ -34,6 +34,9 @@ class DataLoader(ABC):
 
 
 class Dataset(ABC):
+    """
+    Provides basic methods of pytorch-used datasets.
+    """
 
     @abstractmethod
     def __getitem__(self, n: int) -> Tuple[Tensor, int, str]:
@@ -46,41 +49,69 @@ class Dataset(ABC):
     @property
     @abstractmethod
     def unknown_index(self) -> Optional[int]:
+        """Returns index of 'unknown' label for given dataset.
+         If there should be that label, returns None"""
         pass
 
     @property
     @abstractmethod
     def labels(self) -> List[str]:
+        """List of all target labels of the dataset"""
         pass
 
+
 class WalkerDataset(Dataset, ABC):
+    """
+    Provides interface for folder-structured datasets like MSWC.
+    Common structure is the following:
+    <root>
+    \____<train_list>
+    \____<validation_list>
+    \____<test_list>
+    \____<path_to_clips>
+            \____<label_1>
+                    \____<audio_1.wav>
+                    \____<...>
+                    \____<audio_x.wav>
+            \____<label_2>
+            \____<...>
+            \____<label_n>
+    Overriding following methods allows such datasets to be used in a Dataloader instance.
+    """
 
     @property
     @abstractmethod
     def train_list(self) -> str:
+        """Relative (root) path to text file with audio list used in model's training"""
         pass
 
     @property
     @abstractmethod
     def validation_list(self) -> str:
+        """Relative (root) path to text file with audio list used in model's validation"""
         pass
 
     @property
     @abstractmethod
     def test_list(self) -> str:
+        """Relative (root) path to text file with audio list used in model's testing"""
         pass
 
     @property
     @abstractmethod
     def path_to_clips(self) -> str:
+        """Relative (root) path to directory containing all label-directories.
+        See class description."""
         pass
 
     @abstractmethod
     def extract_label_short(self, path_to_clip: str) -> str:
+        """Returns label taken from one item of train/validation/test_list."""
         pass
 
     @abstractmethod
     def extract_label_full(self, path_to_clip: str) -> str:
+        """Returns label taken from the full path to item of train/validation/test_list."""
         pass
 
     @abstractmethod
@@ -88,7 +119,6 @@ class WalkerDataset(Dataset, ABC):
                  predicate=lambda label: True):
         self.root = root
         self.subset = subset
-        # TODO: VALIDATION handling.
         if subset == DataLoaderMode.TRAINING:
             self._walker = self.load_list(self.train_list, predicate)
         elif subset == DataLoaderMode.TESTING:
@@ -119,6 +149,9 @@ class WalkerDataset(Dataset, ABC):
 
 
 class MultiWalkerDataset(Dataset):
+    """Combines several WalkerDatasets into one instance.
+    Is used to train multilingual embeddings.
+    Stacks all labels of given datasets into one list"""
 
     @property
     def unknown_index(self) -> Optional[int]:

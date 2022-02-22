@@ -5,10 +5,12 @@ from src.dataloaders.base import WalkerDataset, DataLoaderMode
 
 
 def is_word_predicate(word: str) -> Callable[[str], bool]:
+    """Predicate to check whether given short path to audio targets word provided"""
     return lambda x: x.split('/')[0] == word
 
 
 class MonoMSWCDataset(WalkerDataset):
+    """WalkerDataset implementation for MSWC dataset. Works with single language."""
 
     def __init__(self, path: str, language: str, subset: DataLoaderMode,
                  predicate: Callable[[str], bool] = lambda label: True):

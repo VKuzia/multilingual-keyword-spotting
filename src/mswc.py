@@ -5,10 +5,8 @@ from models import ModelInfoTag, Model, build_model_of, ModelIOHelper
 from src.dataloaders import MonoMSWCDataset, DataLoaderMode, ClassificationDataLoader, \
     FewShotDataLoader, DataLoader
 from src.models import FewShotModel, CoreModel
-from src.trainers.handlers.validators import ValidationMode
-from src.trainers.handlers.visualization import Printer, PrinterHandler
-from trainers.handlers import ModelSaver
-from trainers.handlers import ClassificationValidator
+from trainers.handlers import ModelSaver, ClassificationValidator, Printer, PrinterHandler, \
+    ValidationMode
 from trainers.trainer import Trainer, DefaultTrainer, TrainingParams
 from paths import PATH_TO_SAVED_MODELS, PATH_TO_MSWC_WAV
 

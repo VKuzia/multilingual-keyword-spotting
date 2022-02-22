@@ -4,12 +4,12 @@ from typing import Tuple, List
 import torch
 import torchaudio
 
-from src.dataloaders import DataLoader
-from src.dataloaders import WalkerDataset, Dataset
+from src.dataloaders import DataLoader, Dataset
 
 
 class BaseDataLoader(DataLoader, ABC):
     # TODO: Improve use of CUDA
+    # TODO: Generalize transform usage
 
     transform = torchaudio.transforms. \
         Spectrogram(n_fft=97, hop_length=400)  # creates spectrograms of 1x49x40
@@ -47,6 +47,7 @@ class BaseDataLoader(DataLoader, ABC):
 
 
 class ClassificationDataLoader(BaseDataLoader):
+    """Implements batch loading for given Dataset instance. Each word has it's own label category"""
 
     def __init__(self, dataset: Dataset, batch_size: int, cuda: bool = True):
         self.dataset = dataset
@@ -87,6 +88,8 @@ class ClassificationDataLoader(BaseDataLoader):
 
 
 class FewShotDataLoader(BaseDataLoader):
+    """Implements batch loading for given target and non_target Dataset instances.
+    Each word is classified either as unknown, or as target"""
 
     def get_labels(self) -> List[str]:
         return ['unknown', 'target']
