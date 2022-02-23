@@ -10,6 +10,8 @@ from trainers.handlers import ModelSaver, ClassificationValidator, Printer, Prin
 from trainers.trainer import Trainer, DefaultTrainer, TrainingParams
 from paths import PATH_TO_SAVED_MODELS, PATH_TO_MSWC_WAV
 
+torch.backends.cudnn.benchmark = True
+
 args = ArgParser().parse_args()
 config = TrainingConfig({"language": None}).load_json(args.config_path)
 

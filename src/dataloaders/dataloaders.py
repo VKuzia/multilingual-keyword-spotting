@@ -66,7 +66,8 @@ class ClassificationDataLoader(BaseDataLoader):
 
     def get_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
         data, labels = next(self.loader_iter)
-        return self.transform(data).to('cuda'), labels.to('cuda')
+        return self.transform(data).to('cuda', non_blocking=True), \
+               labels.to('cuda', non_blocking=True)
 
     def get_labels(self) -> List[str]:
         return self.dataset.labels
@@ -125,4 +126,4 @@ class FewShotDataLoader(BaseDataLoader):
         non_target_data, non_target_labels = next(self.non_target_loader_iter)
         data = torch.concat((target_data, non_target_data), dim=0)
         labels = torch.concat((target_labels, non_target_labels), dim=0)
-        return data.to('cuda'), labels.to('cuda')
+        return data.to('cuda', non_blocking=True), labels.to('cuda', non_blocking=True)

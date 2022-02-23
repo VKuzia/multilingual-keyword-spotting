@@ -81,7 +81,7 @@ class DefaultTrainer(Trainer):
             data_batch, labels_batch = data_loader.get_batch()
             model_output = model(data_batch)
             loss = model.loss_function(model_output, labels_batch)
-            model.optimizer.zero_grad()
+            model.optimizer.zero_grad(set_to_none=True)
             loss.backward()
             model.optimizer.step()
             # model.learning_info.last_loss = loss.item()
