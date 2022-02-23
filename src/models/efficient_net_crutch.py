@@ -9,6 +9,17 @@ from torchvision.ops.misc import ConvNormActivation
 
 
 class SingleEfficientNet(nn.Module):
+    """
+    This class is a full copy off EfficientNet implementation in PyTorch.
+    It's motivated with the need to handle one-channeled images more efficiently.
+    As PyTorch implementation did not allowed to change the number of input channels
+    (assuming it is always 3), I had to replace it by doing copy-paste and changing
+
+    layers.append(ConvNormActivation(3, firstconv_output_channels, ...))
+    to
+    layers.append(ConvNormActivation(1, firstconv_output_channels, ...))
+    """
+
     def __init__(
             self,
             inverted_residual_setting: List[MBConvConfig],

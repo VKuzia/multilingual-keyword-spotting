@@ -49,6 +49,7 @@ def estimate_accuracy(model: Model, data_loader: DataLoader, batch_count: int) -
         data_batch, labels_batch = data_loader.get_batch()
         model_output = model(data_batch).argmax(dim=1)
         # gpu-cpu sync: performance bottleneck
+        # do not use while training
         correct += torch.sum(model_output == labels_batch).item()
         total += len(model_output)
     return correct / total

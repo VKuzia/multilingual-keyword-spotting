@@ -1,14 +1,14 @@
 {
-  "model_name": "test",
+  "model_name": "core_ru",
   "model_version": "0_0_0",
-  "language": "pl",
-  "load_model_from_file": true,
-  "load_optimizer_from_file": true,
+  "language": "ru",
+  "load_model_from_file": false,
+  "load_optimizer_from_file": false,
   "optimizer": "SGD",
   "optimizer_parameters": {"learning_rate":  0.01},
   "checkpoint_version": 1,
-  "batches_per_epoch": 3000,
-  "batch_size": 64,
-  "epochs": 1,
+  "batches_per_epoch": 10000,
+  "batch_size": 128,
+  "epochs": 20,
   "batches_per_validation": 100
 }

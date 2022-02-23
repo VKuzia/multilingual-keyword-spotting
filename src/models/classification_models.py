@@ -1,5 +1,4 @@
 import torch.optim
-import torchvision
 from torch import nn
 
 from src.models import Model
