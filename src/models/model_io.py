@@ -56,9 +56,9 @@ class ModelIOHelper:
             path = self.base_path + path
         with open(f"{path}/{INFO_NAME}", "r") as info_file, open(f"{path}/{LEARNING_INFO_NAME}",
                                                                  "r") as learning_file:
-            info_dict: Dict[str, Any] = json.loads(info_file.readline())
+            info_dict: Dict[str, Any] = json.loads(info_file.read())
             info_tag: ModelInfoTag = ModelInfoTag(**info_dict)
-            learning_dict: Dict[str, Any] = json.loads(learning_file.readline())
+            learning_dict: Dict[str, Any] = json.loads(learning_file.read())
             learning_info: ModelLearningInfo = ModelLearningInfo(**learning_dict)
 
             model: Model = build_model_of(model_class, info_tag, kernel_args=kernel_args)

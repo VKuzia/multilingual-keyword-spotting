@@ -1,8 +1,8 @@
 import torch.optim
-import torchvision
 from torch import nn
 
 from src.models import Model
+from src.models.efficient_net_crutch import single_b0
 
 
 class CoreKernel(nn.Module):
@@ -62,30 +62,5 @@ class CoreModel(Model):
 
     @staticmethod
     def get_default_core_kernel(**kwargs) -> CoreKernel:
-        backbone: nn.Module = torchvision.models.efficientnet_b0(pretrained=False)
-        return CoreKernel(backbone, kwargs['output_channels'])
-
-
-class CoreModel2(Model):
-    """
-    The core of a multilingual embedding.
-    Uses an untrained instance of EfficientNet_b2.
-    """
-
-    @staticmethod
-    def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
-        return torch.optim.SGD(kernel.parameters(), lr=0.1)
-
-    @staticmethod
-    def get_default_kernel(**kwargs) -> nn.Module:
-        backbone: nn.Module = torchvision.models.efficientnet_b2(pretrained=False)
-        return CoreKernel(backbone, kwargs['output_channels'])
-
-    @staticmethod
-    def get_default_loss_function() -> torch.nn.modules.Module:
-        return torch.nn.NLLLoss()
-
-    @staticmethod
-    def get_default_core_kernel(**kwargs) -> CoreKernel:
-        backbone: nn.Module = torchvision.models.efficientnet_b2(pretrained=False)
+        backbone: nn.Module = single_b0()
         return CoreKernel(backbone, kwargs['output_channels'])

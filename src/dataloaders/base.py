@@ -120,16 +120,16 @@ class WalkerDataset(Dataset, ABC):
         self.root = root
         self.subset = subset
         if subset == DataLoaderMode.TRAINING:
-            self._walker = self.load_list(self.train_list, predicate)
+            self._walker = self._load_list(self.train_list, predicate)
         elif subset == DataLoaderMode.TESTING:
-            self._walker = self.load_list(self.test_list, predicate)
+            self._walker = self._load_list(self.test_list, predicate)
         elif subset == DataLoaderMode.VALIDATION:
-            self._walker = self.load_list(self.validation_list, predicate)
+            self._walker = self._load_list(self.validation_list, predicate)
         else:
             raise ValueError(f"Can't handle unknown DataLoaderMode '{subset.name}'")
 
-    def load_list(self, filename: str,
-                  predicate=lambda label: True) -> List[str]:
+    def _load_list(self, filename: str,
+                   predicate=lambda label: True) -> List[str]:
         """Reads specified file to choose samples to provide from dataset"""
         filepath = os.path.join(self.root, filename)
         with open(filepath) as file:

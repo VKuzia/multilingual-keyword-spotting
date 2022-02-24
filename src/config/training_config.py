@@ -12,7 +12,7 @@ class Config:
 
     @property
     @abstractmethod
-    def default_dict(self) -> Dict[str, Optional[Any]]:
+    def _default_dict(self) -> Dict[str, Optional[Any]]:
         """
         Specifies all possible keys for config, provides their defaults.
         Every child is supposed to be a set of independent rules, so there is no
@@ -21,7 +21,7 @@ class Config:
         pass
 
     def __init__(self, additional_keys: Dict[str, Any] = None):
-        self.data = self.default_dict.copy()
+        self.data = self._default_dict.copy()
         if additional_keys:
             self.data.update(additional_keys)
 
@@ -44,7 +44,7 @@ class Config:
 
 
 class TrainingConfig(Config):
-    default_dict: Dict[str, Optional[Any]] = {
+    _default_dict: Dict[str, Optional[Any]] = {
         'model_name': None,
         'model_version': None,
         'load_model_from_file': None,
