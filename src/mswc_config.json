@@ -1,14 +1,15 @@
 {
-  "model_name": "core_ru",
-  "model_version": "0_0_0",
-  "language": "ru",
-  "load_model_from_file": false,
+  "model_name": "core_pl",
+  "model_version": "0_0_4",
+  "language": "pl",
+  "load_model_from_file": true,
   "load_optimizer_from_file": false,
   "optimizer": "SGD",
-  "optimizer_parameters": {"learning_rate":  0.01},
+  "optimizer_parameters": {"learning_rate":  0.0005},
   "checkpoint_version": 1,
-  "batches_per_epoch": 10000,
-  "batch_size": 128,
-  "epochs": 20,
-  "batches_per_validation": 100
+  "batches_per_epoch": 2500,
+  "batch_size": 64,
+  "epochs": 60,
+  "batches_per_validation": 150,
+  "save_after_epochs_count": 5
 }

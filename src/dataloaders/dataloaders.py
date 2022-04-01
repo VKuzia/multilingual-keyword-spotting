@@ -1,45 +1,41 @@
 from abc import ABC, abstractmethod
-from typing import Tuple, List
+from typing import Tuple, List, Iterator, Optional
 
 import torch
 import torchaudio
 from torch import Tensor
 
 from src.dataloaders import DataLoader, Dataset
+from src.transforms.transformers import Transformer, DefaultTransformer
 
 
 class BaseDataLoader(DataLoader, ABC):
-    # TODO: Generalize transform usage
-
-    transform = torchaudio.transforms. \
-        Spectrogram(n_fft=97, hop_length=400)  # creates spectrograms of 1x49x40
 
     @abstractmethod
     def __init__(self, batch_size: int, cuda: bool = True):
         self.batch_size = batch_size
         self.device = torch.device('cuda' if cuda else 'cpu')
 
+    def _label_to_index(self, label: str) -> Tensor:
+        return torch.tensor(self.label_to_index(label), device=self.device)
+
     @staticmethod
     def pad_sequence(batch) -> Tensor:
         """Make all tensor in a batch the same length by padding with zeros"""
         batch = [item.t() for item in batch]
         batch = torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=0.)
-        return batch.permute(0, 2, 1)
+        return batch
 
     def collate_fn(self, batch) -> Tuple[Tensor, Tensor]:
         """Creates a batch of samples"""
         tensors, targets = [], []
 
-        # initial data tuple has the form: waveform, sample_rate, label
-        for waveform, _, label in batch:
-            tensors += [waveform]
+        # initial data tuple has the form: spectrogram, label
+        for tensor, label in batch:
+            tensors += [tensor]
             targets += [torch.tensor(self.label_to_index(label), device=self.device)]
 
-        # Group the list of tensors into a batched tensor
-        tensors = self.pad_sequence(tensors)
-        targets = torch.stack(targets)
-
-        return tensors, targets
+        return self.pad_sequence(tensors), torch.stack(targets)
 
     @abstractmethod
     def label_to_index(self, word: str) -> int:
@@ -49,7 +45,7 @@ class BaseDataLoader(DataLoader, ABC):
 class ClassificationDataLoader(BaseDataLoader):
     """Implements batch loading for given Dataset instance. Each word has it's own label category"""
 
-    def __init__(self, dataset: Dataset, batch_size: int, cuda: bool = True, workers: int = 0):
+    def __init__(self, dataset: Dataset, batch_size: int, cuda: bool = True):
         self._dataset = dataset
         self.labels = self._dataset.labels
         self.labels_map = {word: index for index, word in enumerate(self.labels)}
@@ -59,8 +55,7 @@ class ClassificationDataLoader(BaseDataLoader):
             batch_size=self.batch_size,
             shuffle=True,
             collate_fn=self.collate_fn,
-            pin_memory=cuda,
-            num_workers=workers
+            # pin_memory=cuda
         )
         self._loader_iter = iter(self._loader)
 
@@ -70,8 +65,9 @@ class ClassificationDataLoader(BaseDataLoader):
         except StopIteration:
             self._loader_iter = iter(self._loader)
             data, labels = next(self._loader_iter)
-        return self.transform(data).to(self.device, non_blocking=True), labels.to(self.device,
-                                                                                  non_blocking=True)
+        if data.shape[1] != 1:
+            data = torch.unsqueeze(data, 1)
+        return data.to(self.device, non_blocking=True), labels.to(self.device, non_blocking=True)
 
     def get_labels(self) -> List[str]:
         return self._dataset.labels
@@ -90,6 +86,8 @@ class ClassificationDataLoader(BaseDataLoader):
 class FewShotDataLoader(BaseDataLoader):
     """Implements batch loading for given target and non_target Dataset instances.
     Each word is classified either as unknown, or as target"""
+
+    # TODO: adapt to new augmentation policy
 
     def get_labels(self) -> List[str]:
         return ['unknown', 'target']
@@ -126,7 +124,6 @@ class FewShotDataLoader(BaseDataLoader):
         return 1 if word == self.target else 0
 
     def get_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
-
         try:
             target_data, target_labels = next(self._target_loader_iter)
         except StopIteration:
