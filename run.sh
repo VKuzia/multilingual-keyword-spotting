@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 src/mswc.py -c src/mswc_config.json
+python3 src/train_mono.py -c src/train_mono_config.json

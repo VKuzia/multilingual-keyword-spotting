@@ -4,7 +4,9 @@ from config import ArgParser, TrainingConfig, build_optimizer
 from models import ModelInfoTag, Model, build_model_of, ModelIOHelper
 from src.dataloaders import MonoMSWCDataset, DataLoaderMode, ClassificationDataLoader, \
     FewShotDataLoader, DataLoader
+from src.dataloaders.base import SpecDataset, Dataset
 from src.models import FewShotModel, CoreModel
+from src.transforms.transformers import DefaultTransformer, ValidationTransformer
 from trainers.handlers import ModelSaver, ClassificationValidator, Printer, PrinterHandler, \
     ValidationMode
 from trainers.trainer import Trainer, DefaultTrainer, TrainingParams
@@ -20,22 +22,21 @@ info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_versio
 model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
 model: Model
 
-train_loader: DataLoader = ClassificationDataLoader(
-    MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.TRAINING), config['batch_size'])
+train_dataset: Dataset = SpecDataset(
+    MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.TRAINING, is_wav=False),
+    DefaultTransformer())
 
-validation_loader: DataLoader = ClassificationDataLoader(
-    MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.VALIDATION), config['batch_size'])
+train_loader: DataLoader = ClassificationDataLoader(train_dataset, config['batch_size'])
 
-# train_loader: DataLoader = \
-#     FewShotDataLoader(MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.TRAINING),
-#                       MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.TRAINING),
-#                       config['batch_size'], target='dos', target_probability=0.1)
-# validation_loader: DataLoader = \
-#     FewShotDataLoader(MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.VALIDATION),
-#                       MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.VALIDATION),
-#                       config['batch_size'], target='dos', target_probability=0.1)
+validation_dataset: Dataset = SpecDataset(
+    MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.VALIDATION, is_wav=False),
+    ValidationTransformer()
+)
+
+validation_loader: DataLoader = ClassificationDataLoader(validation_dataset, config['batch_size'])
 
 output_channels = len(train_loader.get_labels())
+print(output_channels)
 
 if config['load_model_from_file']:
     if config['checkpoint_version'] is None:
@@ -62,7 +63,8 @@ training_validator: ClassificationValidator = \
                             batch_count=config['batches_per_validation'],
                             mode=ValidationMode.TRAINING)
 trainer: Trainer = DefaultTrainer([], [printer_handler],
-                                  [validation_validator, training_validator, ModelSaver(model_io),
+                                  [validation_validator, training_validator,
+                                   ModelSaver(model_io, config['save_after_epochs_count']),
                                    printer_handler])
 
 training_params: TrainingParams = TrainingParams(batch_count=config['batches_per_epoch'],

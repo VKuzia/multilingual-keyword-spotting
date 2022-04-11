@@ -3,9 +3,12 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Tuple, List, Optional
 
+import pandas as pd
 import torch
 import torchaudio
 from torch import Tensor
+
+from src.transforms.transformers import Transformer
 
 
 class DataLoaderMode(Enum):
@@ -38,13 +41,22 @@ class Dataset(ABC):
     Provides basic methods of pytorch-used datasets.
     """
 
+    def __init__(self, is_wav: bool):
+        self._is_wav = is_wav
+
     @abstractmethod
-    def __getitem__(self, n: int) -> Tuple[Tensor, int, str]:
+    def __getitem__(self, n: int) -> Tuple[Tensor, str]:
         pass
 
     @abstractmethod
     def __len__(self) -> int:
         pass
+
+    @property
+    def is_wav(self) -> bool:
+        """Shows whether dataset loads ready-made spectrograms
+        or provides waveforms"""
+        return self._is_wav
 
     @property
     @abstractmethod
@@ -81,20 +93,7 @@ class WalkerDataset(Dataset, ABC):
 
     @property
     @abstractmethod
-    def train_list(self) -> str:
-        """Relative (root) path to text file with audio list used in model's training"""
-        pass
-
-    @property
-    @abstractmethod
-    def validation_list(self) -> str:
-        """Relative (root) path to text file with audio list used in model's validation"""
-        pass
-
-    @property
-    @abstractmethod
-    def test_list(self) -> str:
-        """Relative (root) path to text file with audio list used in model's testing"""
+    def path_to_splits(self) -> str:
         pass
 
     @property
@@ -105,47 +104,45 @@ class WalkerDataset(Dataset, ABC):
         pass
 
     @abstractmethod
-    def extract_label_short(self, path_to_clip: str) -> str:
-        """Returns label taken from one item of train/validation/test_list."""
-        pass
-
-    @abstractmethod
-    def extract_label_full(self, path_to_clip: str) -> str:
-        """Returns label taken from the full path to item of train/validation/test_list."""
-        pass
-
-    @abstractmethod
-    def __init__(self, root: str, subset: DataLoaderMode,
+    def __init__(self, root: str, subset: DataLoaderMode, is_wav: bool = True,
                  predicate=lambda label: True):
+        super().__init__(is_wav)
         self.root = root
         self.subset = subset
         if subset == DataLoaderMode.TRAINING:
-            self._walker = self._load_list(self.train_list, predicate)
+            mode = 'train'
         elif subset == DataLoaderMode.TESTING:
-            self._walker = self._load_list(self.test_list, predicate)
+            mode = 'test'
         elif subset == DataLoaderMode.VALIDATION:
-            self._walker = self._load_list(self.validation_list, predicate)
+            mode = 'val'
         else:
             raise ValueError(f"Can't handle unknown DataLoaderMode '{subset.name}'")
+        self.data = self._load_by_mode(self.path_to_splits, mode, predicate)
+        if not self.is_wav:
+            self.data['path'] = self.data['path'].apply(lambda x: x.replace(".wav", ".pt"))
 
-    def _load_list(self, filename: str,
-                   predicate=lambda label: True) -> List[str]:
-        """Reads specified file to choose samples to provide from dataset"""
+    def _load_by_mode(self, filename: str, mode: str, predicate=lambda label: True) -> pd.DataFrame:
         filepath = os.path.join(self.root, filename)
-        with open(filepath) as file:
-            result = []
-            for line in file:
-                if predicate(self.extract_label_short(line)):
-                    result.append(os.path.join(self.root + self.path_to_clips, line.strip()))
-            return result
+        data = pd.read_csv(filepath, delimiter=',')
+        subset = data[data['mode'] == mode]
+        return subset[subset['label'].apply(predicate)].reset_index()
 
-    def __getitem__(self, n: int) -> Tuple[Tensor, int, str]:
-        label = self.extract_label_full(self._walker[n])
-        waveform, sample_rate = torchaudio.load(self._walker[n])
-        return waveform, sample_rate, label
+    def __getitem__(self, n: int) -> Tuple[Tensor, str]:
+        label = self.data['label'][n]
+        path = f'{self.root}{self.path_to_clips}{self.data["path"][n]}'
+        if self.is_wav:
+            waveform, _ = torchaudio.load(path)
+            return waveform, label
+        else:
+            spec = torch.load(path)
+            return spec, label
 
     def __len__(self) -> int:
-        return len(self._walker)
+        return len(self.data)
+
+    @property
+    def labels(self) -> List[str]:
+        return list(self.data['label'].unique())
 
 
 class MultiWalkerDataset(Dataset):
@@ -162,6 +159,7 @@ class MultiWalkerDataset(Dataset):
         return self._labels
 
     def __init__(self, datasets: List[Dataset]):
+        super().__init__(datasets[0].is_wav)
         if not datasets:
             raise ValueError('Empty datasets creation is not allowed.')
         self._datasets = datasets
@@ -172,7 +170,7 @@ class MultiWalkerDataset(Dataset):
     def __len__(self) -> int:
         return self._len
 
-    def __getitem__(self, n: int) -> Tuple[Tensor, int, str]:
+    def __getitem__(self, n: int) -> Tuple[Tensor, str]:
         if n >= self._len or n < 0:
             raise IndexError(f'Could not produce item of index {n}')
         index: int = 0
@@ -181,3 +179,37 @@ class MultiWalkerDataset(Dataset):
             aggregated += self._lengths[index]
             index += 1
         return self._datasets[index][n - aggregated]
+
+
+class SpecDataset(Dataset):
+    """
+    Dataset wrapper which uses given Transformer instance
+    to create spectrogram and augment samples of given dataset
+    """
+
+    def __init__(self, dataset: Dataset, transformer: Transformer):
+        super().__init__(is_wav=False)
+        self.dataset = dataset
+        self.transformer = transformer
+
+    def __getitem__(self, n: int) -> Tuple[Tensor, str]:
+        spectrogram: Tensor
+        label: str
+        if self.dataset.is_wav:
+            waveform, label = self.dataset[n]
+            spectrogram = self.transformer.to_mel_spectrogram(waveform)
+        else:
+            spectrogram, label = self.dataset[n]
+        augmented: Tensor = self.transformer.augment(spectrogram)
+        return augmented, label
+
+    def __len__(self) -> int:
+        return len(self.dataset)
+
+    @property
+    def unknown_index(self) -> Optional[int]:
+        return self.dataset.unknown_index
+
+    @property
+    def labels(self) -> List[str]:
+        return self.dataset.labels

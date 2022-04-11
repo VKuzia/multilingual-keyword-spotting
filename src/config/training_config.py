@@ -57,6 +57,7 @@ class TrainingConfig(Config):
         'batches_per_validation': None,
         'epochs': None,
         'specific': None,
+        'save_after_epochs_count': None
     }
 
     def __init__(self, additional_keys: Dict[str, Any] = None):

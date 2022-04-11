@@ -1,6 +1,9 @@
+from collections import defaultdict
 from enum import Enum
+from typing import Tuple, List, Dict
 
 import torch
+from tqdm import trange
 
 from src.dataloaders import DataLoader
 from src.models import Model
@@ -53,3 +56,22 @@ def estimate_accuracy(model: Model, data_loader: DataLoader, batch_count: int) -
         correct += torch.sum(model_output == labels_batch).item()
         total += len(model_output)
     return correct / total
+
+
+def estimate_accuracy_with_errors(model: Model, data_loader: DataLoader, batch_count: int) \
+        -> Tuple[float, Dict[Tuple[int, int], int]]:
+    correct: int = 0
+    total: int = 0
+    results: Dict[Tuple[int, int], int] = defaultdict(lambda: 0)
+    for _ in trange(batch_count):
+        data_batch, labels_batch = data_loader.get_batch()
+        model_output = model(data_batch).argmax(dim=1)
+        # gpu-cpu sync: performance bottleneck
+        # do not use while training
+        for model_result, labels_result in zip(model_output, labels_batch):
+            if model_result == labels_result:
+                continue
+            results[(model_result.item(), labels_result.item())] += 1
+        correct += torch.sum(model_output == labels_batch).item()
+        total += len(model_output)
+    return correct / total, results
