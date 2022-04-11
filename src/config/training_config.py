@@ -39,13 +39,20 @@ class Config:
             self.data[key] = value
         return self
 
+    def __iter__(self):
+        return iter(self.data.items())
+
     def __getitem__(self, item) -> Any:
         return self.data[item]
+
+    def __len__(self) -> int:
+        return len(self.data)
 
 
 class TrainingConfig(Config):
     _default_dict: Dict[str, Optional[Any]] = {
         'model_name': None,
+        'model_class': None,
         'model_version': None,
         'load_model_from_file': None,
         'load_optimizer_from_file': None,

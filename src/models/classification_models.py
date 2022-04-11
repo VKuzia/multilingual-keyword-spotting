@@ -5,19 +5,24 @@ from src.models import Model
 from src.models.efficient_net_crutch import single_b0
 
 
-class CoreKernel(nn.Module):
+class EfficientNetKernel(nn.Module):
     """PyTorch model used as a kernel of CoreModel"""
 
     def __init__(self, efficient_net: nn.Module, output_categories: int):
         super().__init__()
         self.output_categories = output_categories
+        self.pre_output_categories = 1024
         self.efficient_net = efficient_net
 
-        self.relu1 = nn.Sequential(
-            nn.Linear(1000, 2048),
+        # changing last layer of efficient net
+        self.efficient_net.classifier = nn.Sequential(
+            nn.Dropout(p=0.5),
+            nn.Linear(in_features=self.efficient_net.classifier[1].in_features,
+                      out_features=2048),
             nn.BatchNorm1d(2048),
             nn.ReLU()
         )
+
         self.relu2 = nn.Sequential(
             nn.Linear(2048, 2048),
             nn.BatchNorm1d(2048),
@@ -36,7 +41,6 @@ class CoreKernel(nn.Module):
 
     def forward(self, x):
         x = self.efficient_net(x)
-        x = self.relu1(x)
         x = self.relu2(x)
         x = self.selu(x)
         return self.output(x)
@@ -61,6 +65,6 @@ class CoreModel(Model):
         return torch.nn.NLLLoss()
 
     @staticmethod
-    def get_default_core_kernel(**kwargs) -> CoreKernel:
+    def get_default_core_kernel(**kwargs) -> EfficientNetKernel:
         backbone: nn.Module = single_b0()
-        return CoreKernel(backbone, kwargs['output_channels'])
+        return EfficientNetKernel(backbone, kwargs['output_channels'])

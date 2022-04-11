@@ -9,6 +9,7 @@ import torchaudio
 from torch import Tensor
 
 from src.transforms.transformers import Transformer
+from src.utils.helpers import happen
 
 
 class DataLoaderMode(Enum):
@@ -213,3 +214,36 @@ class SpecDataset(Dataset):
     @property
     def labels(self) -> List[str]:
         return self.dataset.labels
+
+
+class TargetProbaFsDataset(Dataset):
+
+    def __init__(self, target_dataset: Dataset, non_target_dataset: Dataset, target: str,
+                 target_proba: float):
+        super().__init__(target_dataset.is_wav)
+        self.target_dataset = target_dataset
+        self.non_target_dataset = non_target_dataset
+        self.target_proba = target_proba
+        self.target = target
+
+    def __getitem__(self, n: int) -> Tuple[Tensor, str]:
+        if happen(self.target_proba):
+            data, label = self.target_dataset[n % len(self.target_dataset)]
+        else:
+            data, label = self.non_target_dataset[n]
+        if label == self.target:
+            label = 'target'
+        else:
+            label = 'unknown'
+        return data, label
+
+    def __len__(self) -> int:
+        return len(self.non_target_dataset)
+
+    @property
+    def unknown_index(self) -> Optional[int]:
+        return 0
+
+    @property
+    def labels(self) -> List[str]:
+        return ["unknown", "target"]

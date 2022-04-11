@@ -2,8 +2,8 @@ import torch.optim
 
 from config import ArgParser, TrainingConfig, build_optimizer
 from models import ModelInfoTag, Model, build_model_of, ModelIOHelper
-from src.dataloaders import MonoMSWCDataset, DataLoaderMode, ClassificationDataLoader, \
-    FewShotDataLoader, DataLoader
+from src.config.models import get_model_class
+from src.dataloaders import MonoMSWCDataset, DataLoaderMode, ClassificationDataLoader, DataLoader
 from src.dataloaders.base import SpecDataset, Dataset
 from src.models import FewShotModel, CoreModel
 from src.transforms.transformers import DefaultTransformer, ValidationTransformer
@@ -16,6 +16,9 @@ torch.backends.cudnn.benchmark = True
 
 args = ArgParser().parse_args()
 config = TrainingConfig({"language": None}).load_json(args.config_path)
+
+for key, value in config:
+    print(f'{key}: {value}')
 
 language = config["language"]
 info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_version'])
@@ -38,13 +41,14 @@ validation_loader: DataLoader = ClassificationDataLoader(validation_dataset, con
 output_channels = len(train_loader.get_labels())
 print(output_channels)
 
+model_class = get_model_class(config['model_class'])
 if config['load_model_from_file']:
     if config['checkpoint_version'] is None:
         raise ValueError('Version of model to be loaded is unknown')
-    model = model_io.load_model(CoreModel, info_tag, config['checkpoint_version'],
+    model = model_io.load_model(model_class, info_tag, config['checkpoint_version'],
                                 kernel_args={"output_channels": output_channels})
 else:
-    model: Model = build_model_of(CoreModel, info_tag,
+    model: Model = build_model_of(model_class, info_tag,
                                   kernel_args={"output_channels": output_channels})
 
 if not config['load_optimizer_from_file']:

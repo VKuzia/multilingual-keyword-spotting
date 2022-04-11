@@ -1,0 +1,23 @@
+{
+  "model_name": "core_pl_ru_fs",
+  "model_class": "CoreFs",
+  "model_version": "0_0_1",
+  "language": "pl",
+  "target": "безопасности",
+  "target_probability": 0.1,
+  "load_embedding": true,
+  "embedding_name": "core_pl",
+  "embedding_version": "0_0_5",
+  "embedding_class": "Core",
+  "embedding_checkpoint_version": 22,
+  "load_model_from_file": false,
+  "load_optimizer_from_file": false,
+  "optimizer": "Adam",
+  "optimizer_parameters": {"learning_rate":  0.001},
+  "checkpoint_version": 0,
+  "batches_per_epoch": 200,
+  "batch_size": 128,
+  "epochs": 20,
+  "batches_per_validation": 100,
+  "save_after_epochs_count": 1
+}
