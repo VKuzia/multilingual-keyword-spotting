@@ -2,6 +2,7 @@ from typing import Type
 
 import torch.optim
 from torch import nn
+from tqdm import tqdm
 
 from config import ArgParser, TrainingConfig, build_optimizer
 from models import ModelInfoTag, Model, build_model_of, ModelIOHelper
@@ -9,6 +10,7 @@ from src.config.models import get_model_class
 from src.dataloaders import MonoMSWCDataset, DataLoaderMode, ClassificationDataLoader, DataLoader
 from src.dataloaders.base import SpecDataset, Dataset, TargetProbaFsDataset
 from src.models import FewShotModel, CoreModel
+from src.trainers.handlers.validators import estimate_accuracy_with_errors
 from src.transforms.transformers import DefaultTransformer, ValidationTransformer
 from trainers.handlers import ModelSaver, ClassificationValidator, Printer, PrinterHandler, \
     ValidationMode
@@ -55,7 +57,8 @@ validation_non_target_dataset: Dataset = SpecDataset(
     ValidationTransformer()
 )
 validation_target_dataset: Dataset = SpecDataset(
-    MonoMSWCDataset(PATH_TO_MSWC_WAV, config['target_language'], DataLoaderMode.VALIDATION, is_wav=False,
+    MonoMSWCDataset(PATH_TO_MSWC_WAV, config['target_language'], DataLoaderMode.VALIDATION,
+                    is_wav=False,
                     predicate=lambda x: x == config['target']),
     ValidationTransformer()
 )
@@ -109,23 +112,29 @@ if not config['load_optimizer_from_file']:
                                                        output_only=True)
     model.optimizer = optimizer
 
-printer: Printer = Printer(config['epochs'], config['batches_per_epoch'])
-printer_handler: PrinterHandler = PrinterHandler(printer)
-validation_validator: ClassificationValidator = \
-    ClassificationValidator(validation_loader,
-                            batch_count=config['batches_per_validation'],
-                            mode=ValidationMode.VALIDATION)
-training_validator: ClassificationValidator = \
-    ClassificationValidator(train_loader,
-                            batch_count=config['batches_per_validation'],
-                            mode=ValidationMode.TRAINING)
-trainer: Trainer = DefaultTrainer([], [printer_handler],
-                                  [validation_validator, training_validator,
-                                   ModelSaver(model_io, config['save_after_epochs_count']),
-                                   printer_handler])
+val_accuracy, val_errors = estimate_accuracy_with_errors(model, validation_loader,
+                                                         config['batches_per_validation'])
 
-training_params: TrainingParams = TrainingParams(batch_count=config['batches_per_epoch'],
-                                                 batch_size=config['batch_size'],
-                                                 epoch_count=config['epochs'])
+train_accuracy, train_errors = estimate_accuracy_with_errors(model, train_loader,
+                                                             config['batches_per_validation'])
 
-trainer.train(model, train_loader, training_params)
+val_errors = list(sorted(val_errors.items(), key=lambda item: -item[1]))
+train_errors = list(sorted(train_errors.items(), key=lambda item: -item[1]))
+
+val_labels = validation_loader.get_labels()
+with open('val_errors.txt', 'w') as output:
+    output.write("label -> models output: count\n")
+    output.write(f"total count: {config['batches_per_validation'] * config['batch_size']}\n")
+    output.write(f"with target probability: {config['target_probability']}\n")
+    output.write(f"validation accuracy: {val_accuracy}\n\n")
+    for idx, count in tqdm(val_errors):
+        output.write(f'{val_labels[idx[1]]} -> {val_labels[idx[0]]}: {count}\n')
+
+train_labels = train_loader.get_labels()
+with open('train_errors.txt', 'w') as output:
+    output.write("label -> models output: count\n")
+    output.write(f"total count: {config['batches_per_validation'] * config['batch_size']}\n")
+    output.write(f"with target probability: {config['target_probability']}\n")
+    output.write(f"train accuracy: {train_accuracy}\n\n")
+    for idx, count in tqdm(train_errors):
+        output.write(f'{train_labels[idx[1]]} -> {train_labels[idx[0]]}: {count}\n')

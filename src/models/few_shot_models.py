@@ -10,7 +10,7 @@ class FsEfficientNetKernel(nn.Module):
     def __init__(self, core_embedding: EfficientNetKernel):
         super().__init__()
         self.core = core_embedding
-        # self.core.output = nn.Identity()
+        self.core.output = nn.Identity()
         self.output = nn.Sequential(
             nn.Linear(core_embedding.pre_output_categories, 2),
             nn.LogSoftmax(dim=1)

@@ -1,16 +1,16 @@
 {
-  "model_name": "core_pl",
+  "model_name": "core_ru",
   "model_class": "Core",
-  "model_version": "0_0_5",
-  "language": "pl",
+  "model_version": "0_0_6",
+  "language": "ru",
   "load_model_from_file": true,
   "load_optimizer_from_file": false,
-  "optimizer": "SGD",
-  "optimizer_parameters": {"learning_rate":  0.05},
-  "checkpoint_version": 19,
+  "optimizer": "Adam",
+  "optimizer_parameters": {"learning_rate":  0.001},
+  "checkpoint_version": 6,
   "batches_per_epoch": 1500,
   "batch_size": 128,
-  "epochs": 20,
+  "epochs": 30,
   "batches_per_validation": 150,
-  "save_after_epochs_count": 1
+  "save_after_epochs_count": 5
 }

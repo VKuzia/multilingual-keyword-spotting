@@ -15,7 +15,7 @@ from paths import PATH_TO_SAVED_MODELS, PATH_TO_MSWC_WAV
 torch.backends.cudnn.benchmark = True
 
 args = ArgParser().parse_args()
-config = TrainingConfig({"language": None}).load_json(args.config_path)
+config = TrainingConfig({"language": None, "model_class": None}).load_json(args.config_path)
 
 for key, value in config:
     print(f'{key}: {value}')
