@@ -18,8 +18,7 @@ from paths import PATH_TO_SAVED_MODELS, PATH_TO_MSWC_WAV
 torch.backends.cudnn.benchmark = True
 
 args = ArgParser().parse_args()
-additional_args = {"language": None,
-                   "target_language": None,
+additional_args = {"target_language": None,
                    "target": None,
                    "target_probability": None,
                    "load_embedding": None,
@@ -32,10 +31,9 @@ config = TrainingConfig(additional_args).load_json(args.config_path)
 for key, value in config:
     print(f'{key}: {value}')
 
-language = config["language"]
-
 train_non_target_dataset: Dataset = SpecDataset(
-    MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.TRAINING, is_wav=False,
+    MonoMSWCDataset(PATH_TO_MSWC_WAV, config['target_language'], DataLoaderMode.TRAINING,
+                    is_wav=False,
                     predicate=lambda x: x != config['target']),
     DefaultTransformer()
 )
@@ -50,12 +48,14 @@ train_dataset: Dataset = TargetProbaFsDataset(train_target_dataset, train_non_ta
 train_loader: DataLoader = ClassificationDataLoader(train_dataset, config['batch_size'])
 
 validation_non_target_dataset: Dataset = SpecDataset(
-    MonoMSWCDataset(PATH_TO_MSWC_WAV, language, DataLoaderMode.VALIDATION, is_wav=False,
+    MonoMSWCDataset(PATH_TO_MSWC_WAV, config['target_language'], DataLoaderMode.VALIDATION,
+                    is_wav=False,
                     predicate=lambda x: x != config['target']),
     ValidationTransformer()
 )
 validation_target_dataset: Dataset = SpecDataset(
-    MonoMSWCDataset(PATH_TO_MSWC_WAV, config['target_language'], DataLoaderMode.VALIDATION, is_wav=False,
+    MonoMSWCDataset(PATH_TO_MSWC_WAV, config['target_language'], DataLoaderMode.VALIDATION,
+                    is_wav=False,
                     predicate=lambda x: x == config['target']),
     ValidationTransformer()
 )
@@ -64,8 +64,6 @@ validation_dataset: Dataset = TargetProbaFsDataset(validation_target_dataset,
                                                    config['target_probability'])
 validation_loader: DataLoader = ClassificationDataLoader(validation_dataset, config['batch_size'])
 
-embedding_output_channels = len(train_non_target_dataset.labels)
-print(f"embedding output channels: {embedding_output_channels}")
 output_channels = len(train_loader.get_labels())
 print(f"output channels: {output_channels}")
 
@@ -81,11 +79,11 @@ if config['load_model_from_file']:
         raise ValueError('Version of model to be loaded is unknown')
     model = model_io.load_model(model_class, info_tag, config['checkpoint_version'],
                                 kernel_args={"embedding_class": embedding_class,
-                                             "output_channels": embedding_output_channels})
+                                             "output_channels": 1})
 else:
     model: Model = build_model_of(model_class, info_tag,
                                   kernel_args={"embedding_class": embedding_class,
-                                               "output_channels": embedding_output_channels})
+                                               "output_channels": 1})
 
 if config['load_embedding']:
 
@@ -95,7 +93,7 @@ if config['load_embedding']:
         raise ValueError('Version of embedding to be loaded is unknown')
     embedding = model_io.load_model(embedding_class, embedding_info_tag,
                                     config['embedding_checkpoint_version'],
-                                    kernel_args={"output_channels": embedding_output_channels})
+                                    kernel_args={"output_channels": 265})
     embedding.kernel.output = nn.Identity()
     for parameter in embedding.kernel.parameters():
         parameter.requires_grad = False

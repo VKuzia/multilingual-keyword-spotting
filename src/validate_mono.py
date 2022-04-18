@@ -3,6 +3,7 @@ from tqdm import tqdm
 
 from config import ArgParser, TrainingConfig
 from models import ModelInfoTag, Model, ModelIOHelper
+from src.config.configs import ValidationConfig
 from src.config.models import get_model_class
 from src.dataloaders import MonoMSWCDataset, DataLoaderMode, ClassificationDataLoader, DataLoader
 from src.trainers.handlers.validators import estimate_accuracy_with_errors
@@ -11,7 +12,7 @@ from paths import PATH_TO_SAVED_MODELS, PATH_TO_MSWC_WAV
 torch.backends.cudnn.benchmark = True
 
 args = ArgParser().parse_args()
-config = TrainingConfig({"language": None, "model_class": None}).load_json(args.config_path)
+config = ValidationConfig({"language": None, "model_class": None}).load_json(args.config_path)
 
 language = config["language"]
 info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_version'])

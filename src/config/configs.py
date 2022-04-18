@@ -69,3 +69,19 @@ class TrainingConfig(Config):
 
     def __init__(self, additional_keys: Dict[str, Any] = None):
         super().__init__(additional_keys)
+
+
+class ValidationConfig(Config):
+    _default_dict: Dict[str, Optional[Any]] = {
+        'model_name': None,
+        'model_class': None,
+        'model_version': None,
+        'load_model_from_file': None,
+        'checkpoint_version': None,
+        'batch_size': None,
+        'batches_per_validation': None,
+        'specific': None,
+    }
+
+    def __init__(self, additional_keys: Dict[str, Any] = None):
+        super().__init__(additional_keys)

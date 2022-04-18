@@ -4,10 +4,12 @@
   "model_version": "0_0_6",
   "language": "ru",
   "load_model_from_file": true,
-  "load_optimizer_from_file": false,
-  "optimizer": "Adam",
-  "optimizer_parameters": {"learning_rate":  0.001},
   "checkpoint_version": 6,
+
+  "load_optimizer_from_file": false,
+  "optimizer": "SGD",
+  "optimizer_parameters": {"learning_rate":  0.001},
+
   "batches_per_epoch": 1500,
   "batch_size": 128,
   "epochs": 30,
