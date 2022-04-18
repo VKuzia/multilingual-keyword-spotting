@@ -1,0 +1,19 @@
+{
+  "model_name": "core_[ru]_again",
+  "model_class": "Core",
+  "model_version": "0_0_7",
+  "languages": ["ru"],
+  "dataset_part": "popular",
+  "load_model_from_file": false,
+  "checkpoint_version": 0,
+
+  "load_optimizer_from_file": false,
+  "optimizer": "Adam",
+  "optimizer_parameters": {"learning_rate":  0.0001},
+
+  "batches_per_epoch": 100,
+  "batch_size": 128,
+  "epochs": 30,
+  "batches_per_validation": 150,
+  "save_after_epochs_count": 1
+}

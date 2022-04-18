@@ -12,14 +12,15 @@ def is_word_predicate(word: str) -> Callable[[str], bool]:
 class MonoMSWCDataset(WalkerDataset):
     """WalkerDataset implementation for MSWC dataset. Works with single language."""
 
-    def __init__(self, path: str, language: str, subset: DataLoaderMode, is_wav: bool = True,
+    def __init__(self, path: str, language: str, subset: DataLoaderMode, part: str, is_wav: bool = True,
                  predicate: Callable[[str], bool] = lambda label: True):
         self.language = language
+        self.part = part
         super().__init__(f"{path}{language}/", subset, is_wav, predicate)
 
     @property
     def path_to_splits(self) -> str:
-        return f"{self.language}_splits.csv"
+        return f"{self.language}_{self.part}.csv"
 
     @property
     def path_to_clips(self) -> str:

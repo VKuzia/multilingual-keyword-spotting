@@ -1,0 +1,12 @@
+{
+  "model_name": "core_[ru]_again",
+  "model_class": "Core",
+  "model_version": "0_0_7",
+  "languages": ["ru"],
+  "dataset_part": "popular",
+  "load_model_from_file": true,
+  "checkpoint_version": 1,
+
+  "batch_size": 128,
+  "batches_per_validation": 150
+}

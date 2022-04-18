@@ -146,7 +146,7 @@ class WalkerDataset(Dataset, ABC):
         return list(self.data['label'].unique())
 
 
-class MultiWalkerDataset(Dataset):
+class MultiDataset(Dataset):
     """Combines several WalkerDatasets into one instance.
     Is used to train multilingual embeddings.
     Stacks all labels of given datasets into one list"""
