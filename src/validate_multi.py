@@ -30,7 +30,9 @@ def main():
     args = ArgParser().parse_args()
     config = ValidationConfig({"languages": None,
                                "dataset_part": None,
-                               "model_class": None}).load_json(args.config_path)
+                               "model_class": None,
+                               "load_model_from_file": True,
+                               }).load_json(args.config_path)
     for key, value in config:
         print(f'{key}: {value}')
 

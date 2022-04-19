@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Type
 
 import torch.optim
 from torch import nn
@@ -10,10 +10,11 @@ from src.models.efficient_net_crutch import single_b0
 class EfficientNetKernel(nn.Module):
     """PyTorch model used as a kernel of CoreModel"""
 
-    def __init__(self, efficient_net: nn.Module, output_categories: Optional[int]):
+    def __init__(self, efficient_net: nn.Module = single_b0(),
+                 output_channels: Optional[int] = None):
         super().__init__()
-        self.output_categories = output_categories
-        self.output_on = True if not output_categories is None else False
+        self.output_categories = output_channels
+        self.output_on = True if output_channels is not None else False
         self.pre_output_categories = 1024
         self.efficient_net = efficient_net
 
@@ -37,6 +38,7 @@ class EfficientNetKernel(nn.Module):
             nn.BatchNorm1d(1024),
             nn.SELU()
         )
+
         if self.output_on:
             self.output = nn.Sequential(
                 nn.Linear(1024, self.output_categories),
@@ -60,18 +62,26 @@ class CoreModel(Model):
     """
 
     @staticmethod
-    def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
-        return torch.optim.SGD(kernel.parameters(), lr=0.1)
+    def get_kernel_class() -> Type[nn.Module]:
+        return EfficientNetKernel
 
     @staticmethod
-    def get_default_kernel(**kwargs) -> nn.Module:
-        return CoreModel.get_default_core_kernel(**kwargs)
-
-    @staticmethod
-    def get_default_loss_function() -> torch.nn.modules.Module:
+    def get_loss_function() -> torch.nn.modules.Module:
         return torch.nn.NLLLoss()
 
-    @staticmethod
-    def get_default_core_kernel(**kwargs) -> EfficientNetKernel:
-        backbone: nn.Module = single_b0()
-        return EfficientNetKernel(backbone, kwargs['output_channels'])
+    # @staticmethod
+    # def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
+    #     return torch.optim.SGD(kernel.parameters(), lr=0.1)
+    #
+    # @staticmethod
+    # def get_default_kernel(**kwargs) -> nn.Module:
+    #     return CoreModel.get_default_core_kernel(**kwargs)
+    #
+    # @staticmethod
+    # def get_default_loss_function() -> torch.nn.modules.Module:
+    #     return torch.nn.NLLLoss()
+    #
+    # @staticmethod
+    # def get_default_core_kernel(**kwargs) -> EfficientNetKernel:
+    #     backbone: nn.Module = single_b0()
+    #     return EfficientNetKernel(backbone, kwargs['output_channels'])

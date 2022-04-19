@@ -1,19 +1,13 @@
 {
-  "model_name": "core_pl_again_again",
+  "model_name": "core_popular_100",
   "model_class": "CoreFs",
-  "model_version": "0_0_2",
-  "languages": [
-    "ru",
-    "pl"
-  ],
+  "model_version": "0_1_1",
+  "languages": ["ru", "pl", "el", "cs"],
+  "dataset_part": "popular_100",
   "target_language": "ru",
-  "dataset_part": "popular",
   "target": "безопасности",
   "target_probability": 0.4,
-  "load_model_from_file": false,
   "checkpoint_version": 1,
-
-  "embedding_class": "Core",
 
   "batch_size": 64,
   "batches_per_validation": 100

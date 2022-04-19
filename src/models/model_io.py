@@ -1,124 +1,124 @@
-from typing import Optional, Type, Any, Dict
-
 import json
 import os
 import shutil
+from typing import Type, Any, Dict, Optional
+
 import torch
+from torch import nn
 
-from src.models import Model, ModelCheckpoint, build_model_of, ModelInfoTag, ModelLearningInfo
-
-KERNEL_STATE_DICT_NAME = "kernel_state.pth"
-OPTIMIZER_STATE_DICT_NAME = "optimizer_state.pth"
-INFO_NAME = "info.json"
-LEARNING_INFO_NAME = "learning.json"
+from src.models import Model, ModelInfoTag, ModelCheckpoint, ModelLearningInfo
 
 
-class ModelIOHelper:
-    """
-    This class is able of loading and saving models using their info tags and class type.
-    Uses base directory specified in constructor and
-    naming logic using specified constants with get_dir method.
-
-    TODO: correct IO exceptions handling
-    """
+class ModelIO:
+    KERNEL_STATE_DICT_NAME = "kernel_state.pth"
+    OPTIMIZER_STATE_DICT_NAME = "optimizer_state.pth"
+    SCHEDULER_STATE_DICT_NAME = "scheduler.pth"
+    INFO_NAME = "model_info.json"
+    LEARNING_INFO_NAME = "learning_info.json"
 
     def __init__(self, base_path: str = "saved_models/"):
         self.base_path = base_path
 
+    def load_kernel(self, module_class, model_info: ModelInfoTag, checkpoint_version: int, *,
+                    kernel_args: Optional[Dict[str, Any]] = None,
+                    load_output_layer: bool = True) -> nn.Module:
+        checkpoint_path = self._get_dir(model_info, checkpoint_version)
+        kernel: nn.Module = module_class(**kernel_args)
+        if load_output_layer:
+            state_dict = torch.load(f"{checkpoint_path}/{self.KERNEL_STATE_DICT_NAME}")
+            kernel.load_state_dict(state_dict)
+        else:
+            print(checkpoint_path)
+            print(self.base_path)
+            print(model_info.name)
+            kernel.load_state_dict(
+                self._cut_output_layer(f"{checkpoint_path}/{self.KERNEL_STATE_DICT_NAME}"))
+        return kernel
+
+    def load_optimizer(self, optimizer_class, module, model_info: ModelInfoTag,
+                       checkpoint_version: int, *,
+                       optimizer_args: Optional[Dict[str, Any]]) -> torch.optim.Optimizer:
+        checkpoint_path = self._get_dir(model_info, checkpoint_version)
+        optimizer = optimizer_class(module.parameters(), **optimizer_args)
+        optimizer.load_state_dict(
+            torch.load(f'{checkpoint_path}/{self.OPTIMIZER_STATE_DICT_NAME}'))
+        return optimizer
+
+    def load_scheduler(self, scheduler_class, optimizer, model_info: ModelInfoTag,
+                       checkpoint_version: int, *,
+                       scheduler_args: Optional[Dict[str, Any]]) -> torch.optim.Optimizer:
+        checkpoint_path = self._get_dir(model_info, checkpoint_version)
+        scheduler = scheduler_class(optimizer, **scheduler_args)
+        scheduler.load_state_dict(
+            torch.load(f'{checkpoint_path}/{self.SCHEDULER_STATE_DICT_NAME}'))
+        return scheduler
+
     def load_model(self, model_class: Type[Model], model_info: ModelInfoTag,
                    checkpoint_version: int,
-                   kernel_args: Optional[Dict[str, Any]] = None,
-                   *,
-                   load_output_layer: bool = True) -> Model:
-        """
-        Constructs Model instance using locally saved checkpoint and model_info.
-        :param model_class: class to construct instance of
-        :param model_info: model's name parameters to specify model to load
-        :param checkpoint_version: identifier of saved checkpoint
-        :return: constructed model
-        """
-        path = self.get_dir(model_info, checkpoint_version)
-        return self.load_model_by_path(model_class, path, kernel_args, checkpoint_version, True,
-                                       load_output_layer=load_output_layer)
+                   optimizer_class, scheduler_class, *,
+                   kernel_args: Optional[Dict[str, Any]],
+                   optimizer_args: Optional[Dict[str, Any]],
+                   scheduler_args: Optional[Dict[str, Any]],
+                   load_output_layer: bool = True,
+                   output_only: bool = False,
+                   cuda: bool = True) -> Model:
+        directory = self._get_dir(model_info, checkpoint_version)
+        kernel = self.load_kernel(model_class.get_kernel_class(), model_info, checkpoint_version,
+                                  kernel_args=kernel_args, load_output_layer=load_output_layer)
+        optimizer = None
+        if optimizer_class:
+            if not output_only:
+                optimizer = self.load_optimizer(optimizer_class, kernel, model_info,
+                                                checkpoint_version, optimizer_args=optimizer_args)
+            else:
+                if cuda:
+                    kernel.output = kernel.output.cuda()
+                optimizer = self.load_optimizer(optimizer_class, kernel.output, model_info,
+                                                checkpoint_version, optimizer_args=optimizer_args)
+        scheduler = None
+        if scheduler_class:
+            if optimizer_class is None:
+                raise ValueError("Can't load scheduler for None optimizer")
+            scheduler = self.load_scheduler(scheduler_class, optimizer, model_info,
+                                            checkpoint_version, scheduler_args=scheduler_args)
 
-    def load_model_by_path(self, model_class: Type[Model], path: str,
-                           kernel_args: Optional[Dict[str, Any]] = None,
-                           checkpoint_version: int = 0,
-                           use_base_path: bool = True,
-                           *,
-                           load_output_layer: bool = True) -> Model:
-        """
-        Constructs Model instance according specified path and class type.
-        Basically builds the default model and assigns loaded dictionaries to its parameters.
-        :param model_class: class to construct instance of
-        :param path: path to load model from
-        :param checkpoint_version: identifier of saved checkpoint
-        :param use_base_path: specifies whether to use self.base_path prefix for loading the model.
-        :return: constructed model.
-
-        TODO: correct IO exceptions handling
-        """
-        if use_base_path:
-            path = self.base_path + path
-        with open(f"{path}/{INFO_NAME}", "r") as info_file, open(f"{path}/{LEARNING_INFO_NAME}",
-                                                                 "r") as learning_file:
+        with open(f"{directory}/{self.INFO_NAME}", "r") as info_file, open(
+                f"{directory}/{self.LEARNING_INFO_NAME}", "r") as learning_file:
             info_dict: Dict[str, Any] = json.loads(info_file.read())
             info_tag: ModelInfoTag = ModelInfoTag(**info_dict)
             learning_dict: Dict[str, Any] = json.loads(learning_file.read())
             learning_info: ModelLearningInfo = ModelLearningInfo(**learning_dict)
 
-            model: Model = build_model_of(model_class, info_tag, kernel_args=kernel_args)
-            if load_output_layer:
-                model.kernel.load_state_dict(torch.load(f"{path}/{KERNEL_STATE_DICT_NAME}"))
-                model.optimizer.load_state_dict(torch.load(f"{path}/{OPTIMIZER_STATE_DICT_NAME}"))
-            else:
-                model.kernel.load_state_dict(
-                    self._cut_output_from_state_dict(f"{path}/{KERNEL_STATE_DICT_NAME}"))
-            model.learning_info = learning_info
-            model.checkpoint_id = checkpoint_version
-            return model
+        model: Model = model_class(kernel, optimizer, scheduler, model_class.get_loss_function(),
+                                   info_tag, cuda)
+        model.learning_info = learning_info
+        return model
 
-    def save_model(self, model: Model, path: Optional[str] = None,
-                   use_base_path: bool = True) -> None:
-        """
-        Saves model's checkpoint into the directory specified by self.get_dir logic.
-        :param model: model to save
-        :param path: path to save model to
-        :param use_base_path: specifies whether to use self.base_path prefix for loading the model.
-
-        TODO: correct IO exceptions handling
-        """
-        if use_base_path:
-            path = self.base_path
-        if path is None:
-            raise ValueError("Couldn't save model as path is null.")
+    def save_model(self, model):
         checkpoint: ModelCheckpoint = model.build_checkpoint()
-        dir_name: str = self.get_dir(checkpoint.info_tag, checkpoint.checkpoint_id)
-        final_path: str = path + dir_name
+        directory: str = self._get_dir(model.info_tag, model.checkpoint_id)
         try:
-            if os.path.exists(final_path):
-                shutil.rmtree(final_path)
-            os.makedirs(final_path)
+            if os.path.exists(directory):
+                shutil.rmtree(directory)
+            os.makedirs(directory)
         except OSError as error:
             print(error)
-        torch.save(checkpoint.kernel_state_dict, f"{final_path}/{KERNEL_STATE_DICT_NAME}")
-        torch.save(checkpoint.optimizer_state_dict, f"{final_path}/{OPTIMIZER_STATE_DICT_NAME}")
+        torch.save(checkpoint.kernel_state_dict, f'{directory}/{self.KERNEL_STATE_DICT_NAME}')
+        torch.save(checkpoint.optimizer_state_dict, f'{directory}/{self.OPTIMIZER_STATE_DICT_NAME}')
+        torch.save(checkpoint.scheduler_state_dict, f'{directory}/{self.SCHEDULER_STATE_DICT_NAME}')
 
-        with open(f"{final_path}/{INFO_NAME}", "w") as info_file:
+        with open(f"{directory}/{self.INFO_NAME}", "w") as info_file:
             info_file.write(json.dumps(checkpoint.info_tag, default=lambda o: o.__dict__, indent=1))
-        with open(f"{final_path}/{LEARNING_INFO_NAME}", "w") as info_file:
-            learning_info = checkpoint.learning_info
-            learning_info.epochs_trained += 1
+        with open(f"{directory}/{self.LEARNING_INFO_NAME}", "w") as info_file:
             info_file.write(
-                json.dumps(learning_info, default=lambda o: o.__dict__, indent=1))
+                json.dumps(checkpoint.learning_info, default=lambda o: o.__dict__, indent=1))
 
-    @staticmethod
-    def get_dir(model_info: ModelInfoTag, checkpoint_version: int) -> str:
+    def _get_dir(self, model_info: ModelInfoTag, checkpoint_version: int) -> str:
         """Constructs directory name according given model_info and checkpoint version."""
-        return f"{model_info.name}_{model_info.version_tag}_[{checkpoint_version}]"
+        return f"{self.base_path}/{model_info.name}_{model_info.version_tag}_[{checkpoint_version}]"
 
     @staticmethod
-    def _cut_output_from_state_dict(path: str):
+    def _cut_output_layer(path: str):
         state_dict = torch.load(path)
         k_pop = [key for key in state_dict.keys() if key.startswith('output')]
         for key in k_pop:

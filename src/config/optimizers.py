@@ -24,3 +24,13 @@ def build_optimizer(model: Model, name: str,
         return torch.optim.Adam(model_params, lr=params['learning_rate'])
     else:
         raise ValueError(f'Unknown optimizer type {name}.')
+
+
+@no_none()
+def get_optimizer_class(name: str):
+    if name == 'SGD':
+        return torch.optim.SGD
+    elif name == 'Adam':
+        return torch.optim.Adam
+    else:
+        raise ValueError(f'Unknown optimizer type {name}.')
