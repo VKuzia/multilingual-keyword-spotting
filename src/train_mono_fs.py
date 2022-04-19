@@ -93,7 +93,7 @@ if config['load_embedding']:
         raise ValueError('Version of embedding to be loaded is unknown')
     embedding = model_io.load_model(embedding_class, embedding_info_tag,
                                     config['embedding_checkpoint_version'],
-                                    kernel_args={"output_channels": 265})
+                                    kernel_args={"output_channels": None})
     embedding.kernel.output = nn.Identity()
     for parameter in embedding.kernel.parameters():
         parameter.requires_grad = False

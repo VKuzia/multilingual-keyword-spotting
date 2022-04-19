@@ -5,10 +5,9 @@ from tqdm import tqdm
 
 from config import ArgParser
 from src.config.configs import ValidationConfig
-from src.dataloaders import DataLoaderMode, DataLoader
-from src.train_multi import get_multi_loader
+from src.dataloaders import DataLoaderMode, DataLoader, ClassificationDataLoader
 from src.trainers.handlers.validators import estimate_accuracy_with_errors
-from src.utils.routines import build_default_model
+from src.utils.routines import build_default_model, get_multi_dataset
 
 
 def estimate_errors(config, model, loader: DataLoader, mode: str, dir: str = "./out_errors"):
@@ -35,8 +34,10 @@ def main():
     for key, value in config:
         print(f'{key}: {value}')
 
-    train_loader: DataLoader = get_multi_loader(config, DataLoaderMode.TRAINING)
-    validation_loader: DataLoader = get_multi_loader(config, DataLoaderMode.VALIDATION)
+    train_loader: DataLoader = ClassificationDataLoader(
+        get_multi_dataset(config, DataLoaderMode.TRAINING), config['batch_size'])
+    validation_loader: DataLoader = ClassificationDataLoader(
+        get_multi_dataset(config, DataLoaderMode.VALIDATION), config['batch_size'])
     output_channels = len(train_loader.get_labels())
     print("output_channels:", output_channels)
 

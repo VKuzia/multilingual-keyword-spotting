@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 import torch
 
@@ -71,14 +71,15 @@ def build_default_model(config: Config,
     return model, model_io
 
 
-def get_multi_loader(config: Config, mode: DataLoaderMode) -> DataLoader:
+def get_multi_dataset(config: Config, mode: DataLoaderMode,
+                      predicate: Callable[[str], bool] = lambda x: True) -> Dataset:
     dataset_list: List[Dataset] = []
     for language in config['languages']:
         base = MonoMSWCDataset(PATH_TO_MSWC_WAV,
                                language,
                                mode,
                                is_wav=False,
-                               part=config['dataset_part'])
+                               part=config['dataset_part'],
+                               predicate=predicate)
         dataset_list.append(SpecDataset(base, DefaultTransformer()))
-    dataset: Dataset = MultiDataset(dataset_list)
-    return ClassificationDataLoader(dataset, config['batch_size'])
+    return MultiDataset(dataset_list)

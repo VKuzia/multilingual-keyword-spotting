@@ -1,0 +1,28 @@
+{
+  "model_name": "core_pl_again_again",
+  "model_class": "CoreFs",
+  "model_version": "0_0_2",
+  "languages": ["ru", "pl"],
+  "target_language": "ru",
+  "dataset_part": "popular",
+  "target": "безопасности",
+  "target_probability": 0.4,
+  "load_model_from_file": false,
+  "checkpoint_version": 1,
+
+  "load_embedding": true,
+  "embedding_name": "core_ru",
+  "embedding_version": "0_0_6",
+  "embedding_class": "Core",
+  "embedding_checkpoint_version": 6,
+
+  "load_optimizer_from_file": false,
+  "optimizer": "Adam",
+  "optimizer_parameters": {"learning_rate":  0.001},
+
+  "batches_per_epoch": 256,
+  "batch_size": 64,
+  "epochs": 4,
+  "batches_per_validation": 100,
+  "save_after_epochs_count": 1
+}

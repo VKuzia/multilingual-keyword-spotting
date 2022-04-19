@@ -26,7 +26,10 @@ class ModelIOHelper:
         self.base_path = base_path
 
     def load_model(self, model_class: Type[Model], model_info: ModelInfoTag,
-                   checkpoint_version: int, kernel_args: Optional[Dict[str, Any]] = None) -> Model:
+                   checkpoint_version: int,
+                   kernel_args: Optional[Dict[str, Any]] = None,
+                   *,
+                   load_output_layer: bool = True) -> Model:
         """
         Constructs Model instance using locally saved checkpoint and model_info.
         :param model_class: class to construct instance of
@@ -35,12 +38,15 @@ class ModelIOHelper:
         :return: constructed model
         """
         path = self.get_dir(model_info, checkpoint_version)
-        return self.load_model_by_path(model_class, path, kernel_args, checkpoint_version, True)
+        return self.load_model_by_path(model_class, path, kernel_args, checkpoint_version, True,
+                                       load_output_layer=load_output_layer)
 
     def load_model_by_path(self, model_class: Type[Model], path: str,
                            kernel_args: Optional[Dict[str, Any]] = None,
                            checkpoint_version: int = 0,
-                           use_base_path: bool = True) -> Model:
+                           use_base_path: bool = True,
+                           *,
+                           load_output_layer: bool = True) -> Model:
         """
         Constructs Model instance according specified path and class type.
         Basically builds the default model and assigns loaded dictionaries to its parameters.
@@ -62,8 +68,12 @@ class ModelIOHelper:
             learning_info: ModelLearningInfo = ModelLearningInfo(**learning_dict)
 
             model: Model = build_model_of(model_class, info_tag, kernel_args=kernel_args)
-            model.kernel.load_state_dict(torch.load(f"{path}/{KERNEL_STATE_DICT_NAME}"))
-            model.optimizer.load_state_dict(torch.load(f"{path}/{OPTIMIZER_STATE_DICT_NAME}"))
+            if load_output_layer:
+                model.kernel.load_state_dict(torch.load(f"{path}/{KERNEL_STATE_DICT_NAME}"))
+                model.optimizer.load_state_dict(torch.load(f"{path}/{OPTIMIZER_STATE_DICT_NAME}"))
+            else:
+                model.kernel.load_state_dict(
+                    self._cut_output_from_state_dict(f"{path}/{KERNEL_STATE_DICT_NAME}"))
             model.learning_info = learning_info
             model.checkpoint_id = checkpoint_version
             return model
@@ -93,13 +103,24 @@ class ModelIOHelper:
             print(error)
         torch.save(checkpoint.kernel_state_dict, f"{final_path}/{KERNEL_STATE_DICT_NAME}")
         torch.save(checkpoint.optimizer_state_dict, f"{final_path}/{OPTIMIZER_STATE_DICT_NAME}")
+
         with open(f"{final_path}/{INFO_NAME}", "w") as info_file:
             info_file.write(json.dumps(checkpoint.info_tag, default=lambda o: o.__dict__, indent=1))
         with open(f"{final_path}/{LEARNING_INFO_NAME}", "w") as info_file:
+            learning_info = checkpoint.learning_info
+            learning_info.epochs_trained += 1
             info_file.write(
-                json.dumps(checkpoint.learning_info, default=lambda o: o.__dict__, indent=1))
+                json.dumps(learning_info, default=lambda o: o.__dict__, indent=1))
 
     @staticmethod
     def get_dir(model_info: ModelInfoTag, checkpoint_version: int) -> str:
         """Constructs directory name according given model_info and checkpoint version."""
         return f"{model_info.name}_{model_info.version_tag}_[{checkpoint_version}]"
+
+    @staticmethod
+    def _cut_output_from_state_dict(path: str):
+        state_dict = torch.load(path)
+        k_pop = [key for key in state_dict.keys() if key.startswith('output')]
+        for key in k_pop:
+            state_dict.pop(key, None)
+        return state_dict

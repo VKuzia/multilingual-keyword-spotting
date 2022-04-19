@@ -7,7 +7,8 @@ from src.config import Config
 from src.dataloaders import MonoMSWCDataset, DataLoaderMode, ClassificationDataLoader, DataLoader
 from src.dataloaders.base import SpecDataset, Dataset, MultiDataset
 from src.transforms.transformers import DefaultTransformer
-from src.utils.routines import build_default_trainer, build_default_model, get_multi_loader
+from src.utils.routines import build_default_trainer, build_default_model, get_multi_loader, \
+    get_multi_dataset
 from paths import PATH_TO_MSWC_WAV
 
 
@@ -20,8 +21,10 @@ def main():
     for key, value in config:
         print(f'{key}: {value}')
 
-    train_loader: DataLoader = get_multi_loader(config, DataLoaderMode.TRAINING)
-    validation_loader: DataLoader = get_multi_loader(config, DataLoaderMode.VALIDATION)
+    train_loader: DataLoader = ClassificationDataLoader(
+        get_multi_dataset(config, DataLoaderMode.TRAINING), config['batch_size'])
+    validation_loader: DataLoader = ClassificationDataLoader(
+        get_multi_dataset(config, DataLoaderMode.VALIDATION), config['batch_size'])
     output_channels = len(train_loader.get_labels())
     print("output_channels:", output_channels)
 
