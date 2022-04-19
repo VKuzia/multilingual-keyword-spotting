@@ -6,7 +6,7 @@ from src.dataloaders.base import Dataset, TargetProbaFsDataset
 from src.paths import PATH_TO_MSWC_WAV
 from src.utils.routines import get_multi_dataset
 from src.utils.routines_fs import build_default_fs_model, build_default_fs_validation_model
-from src.validate_multi import estimate_errors
+from src.validate import estimate_errors
 
 torch.backends.cudnn.benchmark = True
 
