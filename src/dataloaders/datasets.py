@@ -1,7 +1,6 @@
-import os
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
-from src.dataloaders.base import WalkerDataset, DataLoaderMode
+from src.dataloaders import WalkerDataset, DataLoaderMode
 
 
 def is_word_predicate(word: str) -> Callable[[str], bool]:

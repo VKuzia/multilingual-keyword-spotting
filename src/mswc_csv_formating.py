@@ -5,6 +5,10 @@ from src.paths import PATH_TO_MSWC_CSV, PATH_TO_MSWC_WAV
 
 
 def simplify_dataset(data):
+    """
+    Translates MSWC csv file into a more convinient form for me :)
+    TODO: describe the format
+    """
     df = data[data['VALID'] == True][['SET', 'LINK', 'WORD']]
     df = df.rename(columns={'SET': 'mode', 'LINK': 'path', 'WORD': 'label'})
     df['mode'] = df['mode'].map({'TEST': 'test', 'DEV': 'val', 'TRAIN': 'train'})
@@ -14,6 +18,9 @@ def simplify_dataset(data):
 
 
 def stats_dataset(data):
+    """
+    TODO: describe the format
+    """
     df = pd.DataFrame(data['label'].value_counts()).rename(columns={'label': 'count'})
     for mode in data['mode'].unique():
         df[mode] = data[data['mode'] == mode]['label'].value_counts()
@@ -22,10 +29,12 @@ def stats_dataset(data):
 
 
 def select_labels_by_val(data, lower_bound=10):
+    """Leaves only labels which present in validation subset at least lower_bound times"""
     return list(data[data['val'] >= lower_bound].index)
 
 
 def select_most_frequent(data, count):
+    """Leaves count labels with highest 'count' feature"""
     df = data.sort_values('count', axis=0, ascending=False)
     return list(df[:count].index)
 

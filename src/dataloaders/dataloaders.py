@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Tuple, List, Iterator, Optional
+from typing import Tuple, List
 
 import torch
-import torchaudio
 from torch import Tensor
 
 from src.dataloaders import DataLoader, Dataset
-from src.transforms.transformers import Transformer, DefaultTransformer
 
 
 class BaseDataLoader(DataLoader, ABC):

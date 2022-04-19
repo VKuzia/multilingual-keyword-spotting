@@ -7,10 +7,10 @@
   "target_language": "ru",
   "target": "безопасности",
   "target_probability": 0.4,
-  "load_model_from_file": true,
+  "load_model_from_file": false,
   "checkpoint_version": 1,
 
-  "load_embedding": false,
+  "load_embedding": true,
   "embedding_name": "core_popular_100",
   "embedding_version": "0_1_0",
   "embedding_class": "Core",

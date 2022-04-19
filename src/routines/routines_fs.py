@@ -4,14 +4,17 @@ from src.config import Config
 from src.config.models import get_model_class
 from src.config.optimizers import get_optimizer_class
 from src.config.schedulers import get_scheduler_class
-from src.models import Model, ModelIOHelper, ModelInfoTag
+from src.models import Model, ModelInfoTag
 from src.models.model_io import ModelIO
 from src.paths import PATH_TO_SAVED_MODELS
 
 
+# This code is too dirty. No comments for now.
+# TODO: cleanup and comment
+
 def build_default_fs_model(config: Config,
                            languages: List[str],
-                           cuda: bool = True) -> (Model, ModelIOHelper):
+                           cuda: bool = True) -> (Model, ModelIO):
     info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_version'], languages,
                                           config['dataset_part'])
     model_io: ModelIO = ModelIO(PATH_TO_SAVED_MODELS)
@@ -88,7 +91,7 @@ def build_default_fs_model(config: Config,
 
 def build_default_fs_validation_model(config: Config,
                                       languages: List[str],
-                                      cuda: bool = True) -> (Model, ModelIOHelper):
+                                      cuda: bool = True) -> (Model, ModelIO):
     info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_version'], languages,
                                           config['dataset_part'])
     model_io: ModelIO = ModelIO(PATH_TO_SAVED_MODELS)

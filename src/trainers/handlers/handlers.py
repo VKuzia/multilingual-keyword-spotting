@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Optional
 
-from src.models import Model, ModelIOHelper
+from src.models import Model, ModelIO
 
 
 class HandlerMode(Enum):
@@ -39,7 +38,7 @@ class ModelSaver(LearningHandler):
     Saves the model one time in epoch_rate epochs. Uses ModelIOHelper instance provided.
     """
 
-    def __init__(self, model_io: ModelIOHelper, epoch_rate: int = 1):
+    def __init__(self, model_io: ModelIO, epoch_rate: int = 1):
         self.model_io = model_io
         self.epoch_rate = epoch_rate
         self.epochs_to_save = epoch_rate

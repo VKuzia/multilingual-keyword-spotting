@@ -8,8 +8,8 @@ import torch
 import torchaudio
 from torch import Tensor
 
-from src.transforms.transformers import Transformer
-from src.utils.helpers import happen
+from src.transforms import Transformer
+from src.utils import happen
 
 
 class DataLoaderMode(Enum):
@@ -89,6 +89,11 @@ class WalkerDataset(Dataset, ABC):
             \____<label_2>
             \____<...>
             \____<label_n>
+    \____<path_to_clips_tensors>
+            \____<label_1>
+                    \____<spectrogram_1.pt>
+                    \____<...>
+            \_____<....>
     Overriding following methods allows such datasets to be used in a Dataloader instance.
     """
 
@@ -123,6 +128,8 @@ class WalkerDataset(Dataset, ABC):
             self.data['path'] = self.data['path'].apply(lambda x: x.replace(".wav", ".pt"))
 
     def _load_by_mode(self, filename: str, mode: str, predicate=lambda label: True) -> pd.DataFrame:
+        """Reads given csv and filters it according given mode
+        returning resulting subset DataFrame"""
         filepath = os.path.join(self.root, filename)
         data = pd.read_csv(filepath, delimiter=',')
         subset = data[data['mode'] == mode]
@@ -217,6 +224,12 @@ class SpecDataset(Dataset):
 
 
 class TargetProbaFsDataset(Dataset):
+    """
+    This Dataset implementation produces batches which are filled with few-shot target examples
+    with given probability.
+    Logic of picking target from the audio pool is all on (non_)target_dataset implementations,
+    this class is just a wrapper around them.
+    """
 
     def __init__(self, target_dataset: Dataset, non_target_dataset: Dataset, target: str,
                  target_proba: float):

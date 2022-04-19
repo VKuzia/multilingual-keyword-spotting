@@ -10,27 +10,40 @@ from src.models import Model, ModelInfoTag, ModelCheckpoint, ModelLearningInfo
 
 
 class ModelIO:
+    """
+    This class provides saving and loading models in file system in the following format:
+
+    <base_path>
+    \____<[model.name]_[model.version]_[model.checkpoint_id]>
+            \____<kernel_state.pth>
+            \____<lerning_info.pth>
+            \____<model_info.json>
+            \____<optimizer_state.pth>
+            \____<scheduler_state.pth>
+    """
+
     KERNEL_STATE_DICT_NAME = "kernel_state.pth"
     OPTIMIZER_STATE_DICT_NAME = "optimizer_state.pth"
-    SCHEDULER_STATE_DICT_NAME = "scheduler.pth"
+    SCHEDULER_STATE_DICT_NAME = "scheduler_state.pth"
     INFO_NAME = "model_info.json"
     LEARNING_INFO_NAME = "learning_info.json"
 
     def __init__(self, base_path: str = "saved_models/"):
         self.base_path = base_path
 
-    def load_kernel(self, module_class, model_info: ModelInfoTag, checkpoint_version: int, *,
+    def load_module(self, module_class, model_info: ModelInfoTag, checkpoint_version: int, *,
                     kernel_args: Optional[Dict[str, Any]] = None,
                     load_output_layer: bool = True) -> nn.Module:
+        """
+        Loads given module from filesystem by its info.
+        If load_output_layer is False, cuts output layer from state dictionary (for few-shot).
+        """
         checkpoint_path = self._get_dir(model_info, checkpoint_version)
         kernel: nn.Module = module_class(**kernel_args)
         if load_output_layer:
             state_dict = torch.load(f"{checkpoint_path}/{self.KERNEL_STATE_DICT_NAME}")
             kernel.load_state_dict(state_dict)
         else:
-            print(checkpoint_path)
-            print(self.base_path)
-            print(model_info.name)
             kernel.load_state_dict(
                 self._cut_output_layer(f"{checkpoint_path}/{self.KERNEL_STATE_DICT_NAME}"))
         return kernel
@@ -38,6 +51,10 @@ class ModelIO:
     def load_optimizer(self, optimizer_class, module, model_info: ModelInfoTag,
                        checkpoint_version: int, *,
                        optimizer_args: Optional[Dict[str, Any]]) -> torch.optim.Optimizer:
+        """
+        Loads given optimizer state_dict from filesystem by its info,
+        then constructs an optimizer instance for given module
+        """
         checkpoint_path = self._get_dir(model_info, checkpoint_version)
         optimizer = optimizer_class(module.parameters(), **optimizer_args)
         optimizer.load_state_dict(
@@ -47,6 +64,10 @@ class ModelIO:
     def load_scheduler(self, scheduler_class, optimizer, model_info: ModelInfoTag,
                        checkpoint_version: int, *,
                        scheduler_args: Optional[Dict[str, Any]]) -> torch.optim.Optimizer:
+        """
+        Loads given scheduler state_dict from filesystem by its info
+        then constructs a scheduler for given optimizer
+        """
         checkpoint_path = self._get_dir(model_info, checkpoint_version)
         scheduler = scheduler_class(optimizer, **scheduler_args)
         scheduler.load_state_dict(
@@ -62,8 +83,24 @@ class ModelIO:
                    load_output_layer: bool = True,
                    output_only: bool = False,
                    cuda: bool = True) -> Model:
+        """
+        Loads Model instance from file system in one call.
+        See class description for the format.
+        :param model_class: represents Model child to be created
+        :param model_info: is used to identify model's checkpoint name
+        :param checkpoint_version: is used to identify model's checkpoint version
+        :param optimizer_class: optimizer class to apply to model, if None, no optimizer is created
+        :param scheduler_class: scheduler class to apply to models optimizer, if None, no scheduler is created
+        :param kernel_args: arguments to use in model's __init__
+        :param optimizer_args: arguments to use in optimizer's __init__
+        :param scheduler_args: arguments to use in scheduler's __init__
+        :param load_output_layer: if False loaded model's output layer is omitted
+        :param output_only: if True optimizer is only applied to output layer
+        :param cuda: indicates whether to use cuda
+        :return:
+        """
         directory = self._get_dir(model_info, checkpoint_version)
-        kernel = self.load_kernel(model_class.get_kernel_class(), model_info, checkpoint_version,
+        kernel = self.load_module(model_class.get_kernel_class(), model_info, checkpoint_version,
                                   kernel_args=kernel_args, load_output_layer=load_output_layer)
         optimizer = None
         if optimizer_class:
@@ -71,6 +108,7 @@ class ModelIO:
                 optimizer = self.load_optimizer(optimizer_class, kernel, model_info,
                                                 checkpoint_version, optimizer_args=optimizer_args)
             else:
+                # as kernel is constructed above, output layer's device might differ from kernel's
                 if cuda:
                     kernel.output = kernel.output.cuda()
                 optimizer = self.load_optimizer(optimizer_class, kernel.output, model_info,
@@ -95,6 +133,7 @@ class ModelIO:
         return model
 
     def save_model(self, model):
+        """Saves model's checkpoint in filesystem. See class description for the format"""
         checkpoint: ModelCheckpoint = model.build_checkpoint()
         directory: str = self._get_dir(model.info_tag, model.checkpoint_id)
         try:
@@ -118,7 +157,11 @@ class ModelIO:
         return f"{self.base_path}/{model_info.name}_{model_info.version_tag}_[{checkpoint_version}]"
 
     @staticmethod
-    def _cut_output_layer(path: str):
+    def _cut_output_layer(path: str) -> Dict[str, Any]:
+        """
+        Loads tensor from path provided and omitts its output layer.
+        Is used for transfer learning with few-shot
+        """
         state_dict = torch.load(path)
         k_pop = [key for key in state_dict.keys() if key.startswith('output')]
         for key in k_pop:

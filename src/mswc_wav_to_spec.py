@@ -9,6 +9,7 @@ SPEC_SHAPE = (49, 40)
 
 
 def process_audio(src: str, dest: str) -> None:
+    """Loads wav provided by src, transforms it to cuda tensor and saves to dest"""
     waveform, _ = torchaudio.load(src)
     target = torch.zeros(*SPEC_SHAPE)
     transformed = TRANSFORM(waveform)[0]

@@ -7,7 +7,7 @@ from config import ArgParser
 from src.config.configs import ValidationConfig
 from src.dataloaders import DataLoaderMode, DataLoader, ClassificationDataLoader
 from src.trainers.handlers.validators import estimate_accuracy_with_errors
-from src.utils.routines import build_default_model, get_multi_dataset
+from src.routines.routines import get_multi_dataset, build_default_validation_model
 
 
 def estimate_errors(config, model, loader: DataLoader, mode: str, dir: str = "./out_errors"):
@@ -43,9 +43,8 @@ def main():
     output_channels = len(train_loader.get_labels())
     print("output_channels:", output_channels)
 
-    model, _ = build_default_model(config, config['languages'],
-                                   output_channels,
-                                   validation=True)
+    model, _ = build_default_validation_model(config, config['languages'],
+                                              output_channels)
     model.kernel.eval()
     estimate_errors(config, model, validation_loader, "validation")
     estimate_errors(config, model, train_loader, "train")

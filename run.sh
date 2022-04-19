@@ -2,6 +2,7 @@
 
 export PYTHONPATH="./"
 
+# checks what scenario is passed to $1 via given "lists"
 if [[ "$1" =~ ^(train|train_fs|validate|validate_fs)$ ]]; then
     python3 src/$1.py -c src/$1_config.json
 elif [[ "$1" =~ ^(profile_train|profile_train_fs)$ ]]; then

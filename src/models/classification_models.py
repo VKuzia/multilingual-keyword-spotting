@@ -68,20 +68,3 @@ class CoreModel(Model):
     @staticmethod
     def get_loss_function() -> torch.nn.modules.Module:
         return torch.nn.NLLLoss()
-
-    # @staticmethod
-    # def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
-    #     return torch.optim.SGD(kernel.parameters(), lr=0.1)
-    #
-    # @staticmethod
-    # def get_default_kernel(**kwargs) -> nn.Module:
-    #     return CoreModel.get_default_core_kernel(**kwargs)
-    #
-    # @staticmethod
-    # def get_default_loss_function() -> torch.nn.modules.Module:
-    #     return torch.nn.NLLLoss()
-    #
-    # @staticmethod
-    # def get_default_core_kernel(**kwargs) -> EfficientNetKernel:
-    #     backbone: nn.Module = single_b0()
-    #     return EfficientNetKernel(backbone, kwargs['output_channels'])

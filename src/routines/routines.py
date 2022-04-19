@@ -1,24 +1,24 @@
-from typing import List, Optional, Callable, Dict, Any, Type
+from typing import List, Optional, Callable, Type
 
-from src.config import TrainingConfig, Config
-from src.config.models import get_model_class
-from src.config.optimizers import get_optimizer_class
-from src.config.schedulers import get_scheduler_class
-from src.dataloaders import DataLoader, DataLoaderMode, Dataset, MonoMSWCDataset
-from src.dataloaders.base import SpecDataset, MultiDataset
-from src.models import ModelIOHelper, ModelInfoTag, Model
-from src.models.model_io import ModelIO
+from src.config import TrainingConfig, Config, get_model_class, get_optimizer_class, \
+    get_scheduler_class
+from src.dataloaders import DataLoader, DataLoaderMode, Dataset, MonoMSWCDataset, SpecDataset, \
+    MultiDataset
+from src.models import ModelInfoTag, Model, ModelIO
 from src.paths import PATH_TO_SAVED_MODELS, PATH_TO_MSWC_WAV
 from src.trainers import Trainer, TrainingParams, DefaultTrainer
 from src.trainers.handlers import Printer, PrinterHandler, ClassificationValidator, ValidationMode, \
     ModelSaver
-from src.transforms.transformers import DefaultTransformer
+from src.transforms import DefaultTransformer
 
+
+# This code is too dirty. No comments for now.
+# TODO: cleanup and comment
 
 def build_default_trainer(config: TrainingConfig,
                           train_loader: DataLoader,
                           validation_loader: DataLoader,
-                          model_io: ModelIOHelper) -> (Trainer, TrainingParams):
+                          model_io: ModelIO) -> (Trainer, TrainingParams):
     printer: Printer = Printer(config['epochs'], config['batches_per_epoch'])
     printer_handler: PrinterHandler = PrinterHandler(printer)
     validation_validator: ClassificationValidator = \

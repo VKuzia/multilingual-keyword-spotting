@@ -2,7 +2,7 @@ import torch.optim
 
 from config import ArgParser, TrainingConfig
 from src.dataloaders import DataLoaderMode, ClassificationDataLoader, DataLoader
-from src.utils.routines import build_default_trainer, build_default_model, get_multi_dataset
+from src.routines.routines import build_default_trainer, build_default_model, get_multi_dataset
 
 
 def main():

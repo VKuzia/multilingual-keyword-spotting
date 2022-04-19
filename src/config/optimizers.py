@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Type
 
 import torch.optim
 
@@ -27,7 +27,8 @@ def build_optimizer(model: Model, name: str,
 
 
 @no_none()
-def get_optimizer_class(name: str):
+def get_optimizer_class(name: str) -> Type[torch.optim.Optimizer]:
+    """    Returns optimizers class by given str name    """
     if name == 'SGD':
         return torch.optim.SGD
     elif name == 'Adam':

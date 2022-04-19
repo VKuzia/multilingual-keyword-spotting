@@ -5,6 +5,7 @@ from src.utils import no_none
 
 @no_none()
 def get_scheduler_class(name: str):
+    """ Returns scheduler class by given str name"""
     if name == 'ExponentialLR':
         return torch.optim.lr_scheduler.ExponentialLR
     elif name == 'ReduceLROnPlateau':

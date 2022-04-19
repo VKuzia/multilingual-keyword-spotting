@@ -4,8 +4,8 @@ from config import ArgParser, TrainingConfig
 from src.dataloaders import DataLoaderMode, ClassificationDataLoader, DataLoader, MonoMSWCDataset
 from src.dataloaders.base import Dataset, TargetProbaFsDataset
 from src.paths import PATH_TO_MSWC_WAV
-from src.utils.routines import get_multi_dataset, build_default_trainer
-from src.utils.routines_fs import build_default_fs_model
+from src.routines.routines import get_multi_dataset, build_default_trainer
+from src.routines.routines_fs import build_default_fs_model
 
 torch.backends.cudnn.benchmark = True
 

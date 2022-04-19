@@ -1,6 +1,6 @@
 from collections import defaultdict
 from enum import Enum
-from typing import Tuple, List, Dict
+from typing import Tuple, Dict
 
 import torch
 from tqdm import trange

@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import Dict, Any, Type, Optional, List
+from typing import Dict, Any, Type, List
 from abc import abstractmethod
 
 import torch.optim
@@ -99,32 +99,9 @@ class Model:
     @staticmethod
     @abstractmethod
     def get_kernel_class() -> Type[nn.Module]:
-        pass
+        """Returns kernel nn.Module of given model"""
 
-    # @staticmethod
-    # @abstractmethod
-    # def get_default_optimizer(kernel: nn.Module) -> torch.optim.Optimizer:
-    #     """Returns optimizer to construct initial models of given class with"""
-    #
-    # @staticmethod
-    # @abstractmethod
-    # def get_default_kernel(args: Optional[Dict[str, Any]] = None) -> nn.Module:
-    #     """Returns kernel (nn.Module) to construct initial models of given class with"""
-    #
     @staticmethod
     @abstractmethod
     def get_loss_function() -> torch.nn.modules.Module:
         """Returns loss function to construct models of given class with"""
-
-# def build_model_of(model_class: Type[Model], info_tag: ModelInfoTag, *,
-#                    kernel_args: Optional[Dict[str, Any]] = None,
-#                    kernel: Optional[nn.Module] = None,
-#                    optimizer: Optional[torch.optim.Optimizer] = None,
-#                    cuda: bool = True) -> Model:
-#     """Returns a default (initial) model of a given class"""
-#     kernel: nn.Module = kernel if kernel is not None else model_class.get_default_kernel(
-#         **kernel_args)
-#     optimizer: torch.optim.Optimizer = \
-#         optimizer if optimizer is not None else model_class.get_default_optimizer(kernel)
-#     model: Model = Model(kernel, optimizer, model_class.get_default_loss_function(), info_tag, cuda)
-#     return model

@@ -28,6 +28,7 @@ rng = np.random.RandomState(0)  # we also sort FS listings to aid reproducibilit
 # install it with: apt-get -qq install opus-tools sox
 
 def handle_sample(sample_dest_tuple):
+    """Converts given file from opus format to wav with constant bitrate of 16000 Hz"""
     sample, dest_file = sample_dest_tuple
     cmd = ["opusdec", "--rate", "16000", "--quiet", sample, dest_file]
     subprocess.run(cmd, stdout=open(os.devnull, 'wb'))
