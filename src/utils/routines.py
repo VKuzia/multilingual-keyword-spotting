@@ -46,7 +46,7 @@ def build_default_model(config: Config,
                         *,
                         validation: bool = False) -> (Model, ModelIOHelper):
     info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_version'],
-                                          languages)
+                                          languages, config['dataset_part'])
     model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
     model_class = get_model_class(config['model_class'])
     model: Model

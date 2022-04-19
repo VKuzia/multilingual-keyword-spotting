@@ -17,6 +17,7 @@ class ModelInfoTag:
     name: str
     version_tag: str
     languages: List[str]
+    dataset_par: str
 
     def get_name(self) -> str:
         return f'{self.name}_{self.version_tag}'

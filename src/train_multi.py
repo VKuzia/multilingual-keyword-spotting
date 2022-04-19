@@ -1,15 +1,8 @@
-from typing import List
-
 import torch.optim
 
 from config import ArgParser, TrainingConfig
-from src.config import Config
-from src.dataloaders import MonoMSWCDataset, DataLoaderMode, ClassificationDataLoader, DataLoader
-from src.dataloaders.base import SpecDataset, Dataset, MultiDataset
-from src.transforms.transformers import DefaultTransformer
-from src.utils.routines import build_default_trainer, build_default_model, get_multi_loader, \
-    get_multi_dataset
-from paths import PATH_TO_MSWC_WAV
+from src.dataloaders import DataLoaderMode, ClassificationDataLoader, DataLoader
+from src.utils.routines import build_default_trainer, build_default_model, get_multi_dataset
 
 
 def main():

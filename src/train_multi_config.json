@@ -1,19 +1,19 @@
 {
-  "model_name": "core_[ru]_again",
+  "model_name": "core_popular_100",
   "model_class": "Core",
-  "model_version": "0_0_7",
-  "languages": ["ru"],
-  "dataset_part": "popular",
-  "load_model_from_file": false,
-  "checkpoint_version": 0,
+  "model_version": "0_1_0",
+  "languages": ["ru", "pl", "el", "cs"],
+  "dataset_part": "popular_100",
+  "load_model_from_file": true,
+  "checkpoint_version": 6,
 
   "load_optimizer_from_file": false,
-  "optimizer": "Adam",
+  "optimizer": "SGD",
   "optimizer_parameters": {"learning_rate":  0.0001},
 
-  "batches_per_epoch": 100,
+  "batches_per_epoch": 4000,
   "batch_size": 128,
-  "epochs": 30,
-  "batches_per_validation": 150,
+  "epochs": 1,
+  "batches_per_validation": 300,
   "save_after_epochs_count": 1
 }

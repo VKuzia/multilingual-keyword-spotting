@@ -13,7 +13,8 @@ def build_default_fs_model(config: Config,
                            languages: List[str],
                            *,
                            validation: bool = False) -> (Model, ModelIOHelper):
-    info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_version'], languages)
+    info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_version'], languages,
+                                          config['dataset_part'])
     model_io: ModelIOHelper = ModelIOHelper(PATH_TO_SAVED_MODELS)
     model: Model
     embedding_class = get_model_class(config['embedding_class'])
