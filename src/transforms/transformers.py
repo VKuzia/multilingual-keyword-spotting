@@ -6,7 +6,7 @@ import torchaudio.transforms as T
 from torch import Tensor
 
 from src.transforms.transforms import TimeShifter
-from src.utils.helpers import happen
+from src.utils import happen
 
 
 class Transformer(ABC):
@@ -51,6 +51,10 @@ class Transformer(ABC):
 
 
 class DefaultTransformer(Transformer):
+    """
+    A slight SpecAugment transformer.
+    Applies frequency masking, time masking and time shifts
+    """
 
     def __init__(self):
         self._to_mel_spectrogram = T.MelSpectrogram(n_mels=self.shape[0],
@@ -60,18 +64,11 @@ class DefaultTransformer(Transformer):
                                                 T.FrequencyMasking(2))
         time_masking = torch.nn.Sequential(T.TimeMasking(2),
                                            T.TimeMasking(2))
-        # time_stretch_1 = T.TimeStretch(n_freq=self.shape[0], fixed_rate=0.95)
-        # time_stretch_2 = T.TimeStretch(n_freq=self.shape[0], fixed_rate=1.05)
-        # time_stretch_and_frequency = torch.nn.Sequential(time_stretch_1,
-        #                                                  frequency_masking)
         time_shifter = TimeShifter(3)
         self._augmentations = [
             (0.25, time_shifter),
             (0.25, frequency_masking),
             (0.25, time_masking),
-            # (0.1, time_stretch_1),
-            # (0.1, time_stretch_2),
-            # (0.1, time_stretch_and_frequency),
         ]
 
     @property
@@ -87,6 +84,10 @@ class DefaultTransformer(Transformer):
 
 
 class ValidationTransformer(Transformer):
+    """
+    Identity transformator. Is used in a validation loop for now.
+    TODO: apply augmentations to few-shot targets
+    """
 
     def __init__(self):
         self._to_mel_spectrogram = T.MelSpectrogram(n_mels=self.shape[0],

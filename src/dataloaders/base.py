@@ -8,7 +8,8 @@ import torch
 import torchaudio
 from torch import Tensor
 
-from src.transforms.transformers import Transformer
+from src.transforms import Transformer
+from src.utils import happen
 
 
 class DataLoaderMode(Enum):
@@ -88,6 +89,11 @@ class WalkerDataset(Dataset, ABC):
             \____<label_2>
             \____<...>
             \____<label_n>
+    \____<path_to_clips_tensors>
+            \____<label_1>
+                    \____<spectrogram_1.pt>
+                    \____<...>
+            \_____<....>
     Overriding following methods allows such datasets to be used in a Dataloader instance.
     """
 
@@ -122,6 +128,8 @@ class WalkerDataset(Dataset, ABC):
             self.data['path'] = self.data['path'].apply(lambda x: x.replace(".wav", ".pt"))
 
     def _load_by_mode(self, filename: str, mode: str, predicate=lambda label: True) -> pd.DataFrame:
+        """Reads given csv and filters it according given mode
+        returning resulting subset DataFrame"""
         filepath = os.path.join(self.root, filename)
         data = pd.read_csv(filepath, delimiter=',')
         subset = data[data['mode'] == mode]
@@ -145,7 +153,7 @@ class WalkerDataset(Dataset, ABC):
         return list(self.data['label'].unique())
 
 
-class MultiWalkerDataset(Dataset):
+class MultiDataset(Dataset):
     """Combines several WalkerDatasets into one instance.
     Is used to train multilingual embeddings.
     Stacks all labels of given datasets into one list"""
@@ -213,3 +221,42 @@ class SpecDataset(Dataset):
     @property
     def labels(self) -> List[str]:
         return self.dataset.labels
+
+
+class TargetProbaFsDataset(Dataset):
+    """
+    This Dataset implementation produces batches which are filled with few-shot target examples
+    with given probability.
+    Logic of picking target from the audio pool is all on (non_)target_dataset implementations,
+    this class is just a wrapper around them.
+    """
+
+    def __init__(self, target_dataset: Dataset, non_target_dataset: Dataset, target: str,
+                 target_proba: float):
+        super().__init__(target_dataset.is_wav)
+        self.target_dataset = target_dataset
+        self.non_target_dataset = non_target_dataset
+        self.target_proba = target_proba
+        self.target = target
+
+    def __getitem__(self, n: int) -> Tuple[Tensor, str]:
+        if happen(self.target_proba):
+            data, label = self.target_dataset[n % len(self.target_dataset)]
+        else:
+            data, label = self.non_target_dataset[n]
+        if label == self.target:
+            label = 'target'
+        else:
+            label = 'unknown'
+        return data, label
+
+    def __len__(self) -> int:
+        return len(self.non_target_dataset)
+
+    @property
+    def unknown_index(self) -> Optional[int]:
+        return 0
+
+    @property
+    def labels(self) -> List[str]:
+        return ["unknown", "target"]

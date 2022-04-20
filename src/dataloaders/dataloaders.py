@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Tuple, List, Iterator, Optional
+from typing import Tuple, List
 
 import torch
-import torchaudio
 from torch import Tensor
 
 from src.dataloaders import DataLoader, Dataset
-from src.transforms.transformers import Transformer, DefaultTransformer
 
 
 class BaseDataLoader(DataLoader, ABC):
@@ -81,60 +79,3 @@ class ClassificationDataLoader(BaseDataLoader):
                 return self._dataset.unknown_index
             else:
                 raise ValueError("Unknown label but 'unknown' is not a target category")
-
-
-class FewShotDataLoader(BaseDataLoader):
-    """Implements batch loading for given target and non_target Dataset instances.
-    Each word is classified either as unknown, or as target"""
-
-    # TODO: adapt to new augmentation policy
-
-    def get_labels(self) -> List[str]:
-        return ['unknown', 'target']
-
-    def __init__(self, target_dataset: Dataset,
-                 non_target_dataset: Dataset, batch_size: int,
-                 target: str, target_probability: float, cuda: bool = True, workers: int = 0):
-        super().__init__(batch_size, cuda)
-        self.target = target
-        self._target_dataset = target_dataset
-        self._non_target_dataset = non_target_dataset
-        target_batch_size = int(batch_size * target_probability)
-        non_target_batch_size = batch_size - target_batch_size
-        self._target_loader = torch.utils.data.DataLoader(
-            self._target_dataset,
-            batch_size=target_batch_size,
-            shuffle=True,
-            collate_fn=self.collate_fn,
-            pin_memory=cuda,
-            num_workers=workers
-        )
-        self._non_target_loader = torch.utils.data.DataLoader(
-            self._non_target_dataset,
-            batch_size=non_target_batch_size,
-            shuffle=True,
-            collate_fn=self.collate_fn,
-            pin_memory=cuda,
-            num_workers=workers
-        )
-        self._target_loader_iter = iter(self._target_loader)
-        self._non_target_loader_iter = iter(self._non_target_loader)
-
-    def label_to_index(self, word: str) -> int:
-        return 1 if word == self.target else 0
-
-    def get_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        try:
-            target_data, target_labels = next(self._target_loader_iter)
-        except StopIteration:
-            self._target_loader_iter = iter(self._target_loader)
-            target_data, target_labels = next(self._target_loader_iter)
-        try:
-            non_target_data, non_target_labels = next(self._non_target_loader_iter)
-        except StopIteration:
-            self._non_target_loader_iter = iter(self._non_target_loader)
-            non_target_data, non_target_labels = next(self._non_target_loader_iter)
-
-        data = torch.concat((target_data, non_target_data), dim=0)
-        labels = torch.concat((target_labels, non_target_labels), dim=0)
-        return data.to(self.device, non_blocking=True), labels.to(self.device, non_blocking=True)

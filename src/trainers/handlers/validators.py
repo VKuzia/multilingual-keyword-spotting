@@ -1,6 +1,6 @@
 from collections import defaultdict
 from enum import Enum
-from typing import Tuple, List, Dict
+from typing import Tuple, Dict
 
 import torch
 from tqdm import trange
@@ -19,21 +19,25 @@ class ClassificationValidator(LearningHandler):
     """Performs accuracy estimation on a set of data provided via data_loader"""
 
     def __init__(self, data_loader: DataLoader, batch_count: int,
-                 mode: ValidationMode = ValidationMode.VALIDATION):
+                 mode: ValidationMode = ValidationMode.VALIDATION, switch_to_train: bool = True):
         self.data_loader = data_loader
         self.batch_count = batch_count
         self.validation_mode = mode
+        self.switch_to_train = switch_to_train
 
     def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
         """
         Performs self.batch_count tests accumulating number of correct answers
         and writes the final accuracy to self.output_stream
         """
+        model.kernel.eval()
         accuracy = estimate_accuracy(model, self.data_loader, self.batch_count)
         if self.validation_mode.value == ValidationMode.VALIDATION.value:
             model.learning_info.val_accuracy_history.append(accuracy)
         elif self.validation_mode.value == ValidationMode.TRAINING.value:
             model.learning_info.train_accuracy_history.append(accuracy)
+        if self.switch_to_train:
+            model.kernel.train()
 
 
 def estimate_accuracy(model: Model, data_loader: DataLoader, batch_count: int) -> float:
@@ -60,6 +64,7 @@ def estimate_accuracy(model: Model, data_loader: DataLoader, batch_count: int) -
 
 def estimate_accuracy_with_errors(model: Model, data_loader: DataLoader, batch_count: int) \
         -> Tuple[float, Dict[Tuple[int, int], int]]:
+    model.kernel.eval()
     correct: int = 0
     total: int = 0
     results: Dict[Tuple[int, int], int] = defaultdict(lambda: 0)

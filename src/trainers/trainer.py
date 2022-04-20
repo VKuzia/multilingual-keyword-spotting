@@ -79,11 +79,11 @@ class DefaultTrainer(Trainer):
         Invokes after_step_handlers after pushing the gradients backward."""
         for _ in range(params.batch_count):
             data_batch, labels_batch = data_loader.get_batch()
+            model.optimizer.zero_grad(set_to_none=True)
             model_output = model(data_batch)
             loss = model.loss_function(model_output, labels_batch)
-            model.optimizer.zero_grad(set_to_none=True)
             loss.backward()
             model.optimizer.step()
-            # model.learning_info.last_loss = loss.item()
             for handler in after_step_handlers:
                 handler.handle(model, mode=HandlerMode.STEP)
+        model.scheduler.step()

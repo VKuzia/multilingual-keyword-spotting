@@ -1,5 +1,6 @@
 PATH_TO_SAVED_MODELS = "saved_models/"
 PATH_TO_STATS = "saved_stats/"
 PATH_TO_SPEECH_COMMANDS = "dataset/speech_commands/SpeechCommands/speech_commands_v0.02/"
-PATH_TO_MSWC = "dataset/multilingual_spoken_words/mswc_microset/"
-PATH_TO_MSWC_WAV = "dataset/multilingual_spoken_words/mswc_microset_wav/"
+PATH_TO_MSWC_OPUS = "dataset/multilingual_spoken_words/opus/"
+PATH_TO_MSWC_WAV = "dataset/multilingual_spoken_words/wav/"
+PATH_TO_MSWC_CSV = "dataset/multilingual_spoken_words/wav/"
