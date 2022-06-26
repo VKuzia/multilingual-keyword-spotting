@@ -15,7 +15,7 @@ from src.paths import PATH_TO_MSWC_OPUS, PATH_TO_MSWC_WAV
 
 CONVERT_ALL = True
 N_SAMPLES_TO_CONVERT = 20  # unused if CONVERT_ALL == True
-LANGUAGES_LIST = ["cs", "el", "tt", "uk"]
+LANGUAGES_LIST = ["ru"]
 THREADS_COUNT = 4
 
 SRC = Path(PATH_TO_MSWC_OPUS)

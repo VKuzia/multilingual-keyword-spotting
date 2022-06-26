@@ -1,32 +1,50 @@
 {
-  "model_name": "core_popular_100",
-  "model_class": "CoreFs",
-  "model_version": "0_1_1",
-  "languages": ["ru", "pl", "el", "cs"],
-  "dataset_part": "popular_100",
-  "target_language": "ru",
-  "target": "безопасности",
-  "target_probability": 0.4,
+  "model_name": "cnnY_it_by_[pl_ru]_1_epoch",
+  "model_class": "Fs",
+  "model_version": "0_2_0",
+  "languages": [
+    "it"
+  ],
+  "target_language": "it",
+  "bank_dataset_part": "bank_300+_1000",
+  "target_dataset_part": "top_180_len_4",
+  "val_dataset_part": "top_180_len_4",
+  "targets": [
+    "essere",
+    "quella",
+    "secondo",
+    "tutte",
+    "vengono",
+    "diversi",
+    "fase",
+    "attualmente"
+  ],
+  "k": 5,
+  "target_probability": 0.5,
+  "target_count": 200,
+  "train_non_target_count": 50000,
+  "val_non_target_count": 50000,
+  "tries": 700,
   "load_model_from_file": false,
-  "checkpoint_version": 1,
-
+  "checkpoint_version": 0,
   "load_embedding": true,
-  "embedding_name": "core_popular_100",
-  "embedding_version": "0_1_0",
-  "embedding_class": "Core",
-  "embedding_checkpoint_version": 12,
-
-  "load_optimizer_from_file": true,
-  "optimizer_class": "SGD",
-  "optimizer_parameters": {"lr":  0.001},
-
-  "load_scheduler_from_file": true,
+  "embedding_name": "test_[pl_ru]_4",
+  "embedding_version": "0_0_0",
+  "embedding_class": "CnnY",
+  "embedding_checkpoint_version": 4,
+  "load_optimizer_from_file": false,
+  "optimizer_class": "Adam",
+  "optimizer_parameters": {
+    "lr": 0.005
+  },
+  "load_scheduler_from_file": false,
   "scheduler_class": "ExponentialLR",
-  "scheduler_parameters": {"gamma":  0.9},
-
-  "batches_per_epoch": 256,
-  "batch_size": 64,
-  "epochs": 4,
-  "batches_per_validation": 100,
-  "save_after_epochs_count": 1
+  "scheduler_parameters": {
+    "gamma": 0.8
+  },
+  "batches_per_epoch": 16,
+  "batch_size": 16,
+  "epochs": 1,
+  "batches_per_validation": 80,
+  "save_after_epochs_count": 5
 }

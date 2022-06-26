@@ -14,9 +14,11 @@ from src.paths import PATH_TO_SAVED_MODELS
 
 def build_default_fs_model(config: Config,
                            languages: List[str],
-                           cuda: bool = True) -> (Model, ModelIO):
-    info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_version'], languages,
-                                          config['dataset_part'])
+                           cuda: bool = True,
+                           dataset_part: str = None) -> (Model, ModelIO):
+    info_tag: ModelInfoTag = \
+        ModelInfoTag(config['model_name'], config['model_version'], languages,
+                     dataset_part if dataset_part is not None else config['dataset_part'])
     model_io: ModelIO = ModelIO(PATH_TO_SAVED_MODELS)
     embedding_class = get_model_class(config['embedding_class'])
     model_class: Type[Model] = get_model_class(config['model_class'])
@@ -77,7 +79,6 @@ def build_default_fs_model(config: Config,
 
         kernel_class = model_class.get_kernel_class()
         kernel_args = {"embedding": embedding.kernel}
-        print(kernel_class)
         kernel = kernel_class(**kernel_args)
         optimizer = optimizer_class(kernel.output.parameters(), **optimizer_params)
         model: Model = model_class(kernel,

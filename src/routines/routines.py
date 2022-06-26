@@ -9,7 +9,7 @@ from src.paths import PATH_TO_SAVED_MODELS, PATH_TO_MSWC_WAV
 from src.trainers import Trainer, TrainingParams, DefaultTrainer
 from src.trainers.handlers import Printer, PrinterHandler, ClassificationValidator, ValidationMode, \
     ModelSaver
-from src.transforms import DefaultTransformer
+from src.transforms import DefaultTransformer, SpecAugTransformer
 
 
 # This code is too dirty. No comments for now.
@@ -44,10 +44,11 @@ def build_default_model(config: Config,
                         languages: List[str],
                         output_channels: Optional[int],
                         *,
+                        path_to_saved_models: str,
                         cuda: bool = True) -> (Model, ModelIO):
     info_tag: ModelInfoTag = ModelInfoTag(config['model_name'], config['model_version'],
                                           languages, config['dataset_part'])
-    model_io: ModelIO = ModelIO(PATH_TO_SAVED_MODELS)
+    model_io: ModelIO = ModelIO(path_to_saved_models)
     model_class: Type[Model] = get_model_class(config['model_class'])
     model: Model
     optimizer_class = get_optimizer_class(config['optimizer_class'])
@@ -116,12 +117,12 @@ def build_default_validation_model(config: Config,
 def get_multi_dataset(config: Config, mode: DataLoaderMode,
                       predicate: Callable[[str], bool] = lambda x: True) -> Dataset:
     dataset_list: List[Dataset] = []
-    for language in config['languages']:
+    for language in sorted(config['languages']):
         base = MonoMSWCDataset(PATH_TO_MSWC_WAV,
                                language,
                                mode,
                                is_wav=False,
                                part=config['dataset_part'],
                                predicate=predicate)
-        dataset_list.append(SpecDataset(base, DefaultTransformer()))
-    return MultiDataset(dataset_list)
+        dataset_list.append(base)
+    return SpecDataset(MultiDataset(dataset_list), SpecAugTransformer())

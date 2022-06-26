@@ -3,11 +3,13 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Tuple, List, Optional
 
+import numpy as np
 import pandas as pd
 import torch
 import torchaudio
 from torch import Tensor
 
+from src import utils
 from src.transforms import Transformer
 from src.utils import happen
 
@@ -17,6 +19,7 @@ class DataLoaderMode(Enum):
     TRAINING = 0
     VALIDATION = 1
     TESTING = 2
+    ANY = 4
 
 
 class DataLoader(ABC):
@@ -42,7 +45,7 @@ class Dataset(ABC):
     Provides basic methods of pytorch-used datasets.
     """
 
-    def __init__(self, is_wav: bool):
+    def __init__(self, is_wav: bool, sample_count: Optional[int] = None):
         self._is_wav = is_wav
 
     @abstractmethod
@@ -121,6 +124,8 @@ class WalkerDataset(Dataset, ABC):
             mode = 'test'
         elif subset == DataLoaderMode.VALIDATION:
             mode = 'val'
+        elif subset == DataLoaderMode.ANY:
+            mode = 'any'
         else:
             raise ValueError(f"Can't handle unknown DataLoaderMode '{subset.name}'")
         self.data = self._load_by_mode(self.path_to_splits, mode, predicate)
@@ -132,7 +137,10 @@ class WalkerDataset(Dataset, ABC):
         returning resulting subset DataFrame"""
         filepath = os.path.join(self.root, filename)
         data = pd.read_csv(filepath, delimiter=',')
-        subset = data[data['mode'] == mode]
+        if mode != 'any':
+            subset = data[data['mode'] == mode]
+        else:
+            subset = data
         return subset[subset['label'].apply(predicate)].reset_index()
 
     def __getitem__(self, n: int) -> Tuple[Tensor, str]:
@@ -260,3 +268,25 @@ class TargetProbaFsDataset(Dataset):
     @property
     def labels(self) -> List[str]:
         return ["unknown", "target"]
+
+
+class SampledDataset(Dataset):
+
+    def __init__(self, dataset: Dataset, indices: List[int]):
+        super().__init__(is_wav=dataset.is_wav)
+        self._dataset = dataset
+        self._indices = indices
+
+    def __getitem__(self, n: int) -> Tuple[Tensor, str]:
+        return self._dataset[self._indices[n]]
+
+    def __len__(self) -> int:
+        return len(self._indices)
+
+    @property
+    def unknown_index(self) -> Optional[int]:
+        return self._dataset.unknown_index
+
+    @property
+    def labels(self) -> List[str]:
+        return self._dataset.labels

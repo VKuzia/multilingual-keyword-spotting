@@ -38,8 +38,10 @@ class PrinterHandler(LearningHandler):
     def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
         if mode == HandlerMode.POST_EPOCH:
             self._printer.update_epoch()
-            self._printer.update_accuracy(model.learning_info.val_accuracy_history[-1],
-                                          model.learning_info.train_accuracy_history[-1])
+            if len(model.learning_info.val_accuracy_history) > 0 and len(
+                    model.learning_info.train_accuracy_history) > 0:
+                self._printer.update_accuracy(model.learning_info.val_accuracy_history[-1],
+                                              model.learning_info.train_accuracy_history[-1])
         elif mode == HandlerMode.STEP:
             self._printer.update_step()
         else:

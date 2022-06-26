@@ -3,13 +3,13 @@ from typing import Type
 import torch
 from torch import nn
 
-from src.models import Model, EfficientNetKernel
+from src.models import Model, TransferClassifier
 
 
-class FsEfficientNetKernel(nn.Module):
+class FsKernel(nn.Module):
     """PyTorch model used as a kernel of FewShotModel."""
 
-    def __init__(self, embedding: EfficientNetKernel = EfficientNetKernel()):
+    def __init__(self, embedding: TransferClassifier):
         super().__init__()
         self.embedding = embedding
         # self.embedding.output = nn.Identity()
@@ -23,8 +23,8 @@ class FsEfficientNetKernel(nn.Module):
             param.requires_grad = True
 
     def forward(self, x):
-        x = self.embedding(x)
-        output = self.output(x)
+        a = self.embedding(x)
+        output = self.output(a)
         return output
 
 
@@ -35,7 +35,7 @@ class FewShotModel(Model):
 
     @staticmethod
     def get_kernel_class() -> Type[nn.Module]:
-        return FsEfficientNetKernel
+        return FsKernel
 
     @staticmethod
     def get_loss_function() -> torch.nn.modules.Module:
