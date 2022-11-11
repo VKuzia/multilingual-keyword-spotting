@@ -5,3 +5,4 @@ __pycache__
 saved_models
 src/temp.py
 out_errors
+/output/

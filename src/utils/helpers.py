@@ -1,6 +1,8 @@
 import random
 from typing import Any, Optional, List, Dict
 
+import numpy as np
+
 
 def inspect_keys(dictionary: Optional[Dict[Any, Any]], keys: List[Any]):
     """Ensures all specified keys are present in dictionary. Otherwise throws KeyError"""
@@ -16,3 +18,7 @@ def inspect_keys(dictionary: Optional[Dict[Any, Any]], keys: List[Any]):
 def happen(probability: float) -> bool:
     """is True with given probability"""
     return random.random() < probability
+
+
+def rand_indices(high: int, size: int) -> List[int]:
+    return list(np.random.random_integers(low=0, high=high, size=(size,)))

@@ -50,16 +50,15 @@ def estimate_accuracy(model: Model, data_loader: DataLoader, batch_count: int) -
     :param batch_count: number of batches to use for estimation
     :return: accuracy float value from 0 to 1
     """
-    correct: int = 0
-    total: int = 0
+    correct = torch.zeros(size=(1,)).cuda()
+    batch_size = len(data_loader.get_batch()[0])
     for _ in range(batch_count):
         data_batch, labels_batch = data_loader.get_batch()
         model_output = model(data_batch).argmax(dim=1)
         # gpu-cpu sync: performance bottleneck
         # do not use while training
-        correct += torch.sum(model_output == labels_batch).item()
-        total += len(model_output)
-    return correct / total
+        correct += torch.sum(model_output == labels_batch)
+    return correct.item() / (batch_size * batch_count)
 
 
 def estimate_accuracy_with_errors(model: Model, data_loader: DataLoader, batch_count: int) \

@@ -5,7 +5,7 @@ import torch
 import torchaudio.transforms as T
 from torch import Tensor
 
-from src.transforms.transforms import TimeShifter
+from src.transforms.transforms import TimeShifter, PowerEnhance
 from src.utils import happen
 
 
@@ -69,6 +69,48 @@ class DefaultTransformer(Transformer):
             (0.25, time_shifter),
             (0.25, frequency_masking),
             (0.25, time_masking),
+        ]
+
+    @property
+    def shape(self) -> Tuple[int, int]:
+        return 49, 40
+
+    def to_mel_spectrogram(self, waveform: Tensor) -> Tensor:
+        return self.pad_to_shape(self._to_mel_spectrogram(waveform))
+
+    @property
+    def augment_list(self) -> List[Tuple[float, Callable]]:
+        return self._augmentations
+
+
+class SpecAugTransformer(Transformer):
+    """
+    A slight SpecAugment transformer.
+    Applies frequency masking, time masking and time shifts
+    """
+
+    def __init__(self):
+        self._to_mel_spectrogram = T.MelSpectrogram(n_mels=self.shape[0],
+                                                    hop_length=401)
+        frequency_masking_1 = torch.nn.Sequential(T.FrequencyMasking(2),
+                                                  T.FrequencyMasking(2))
+        frequency_masking_2 = T.FrequencyMasking(3)
+        time_masking = torch.nn.Sequential(T.TimeMasking(2),
+                                           T.TimeMasking(2))
+        time_shifter_1 = TimeShifter(3)
+        time_shifter_2 = TimeShifter(-4)
+
+        power_enhancer_1 = PowerEnhance(1.07)
+
+        power_enhancer_2 = PowerEnhance(0.9)
+        self._augmentations = [
+            (0.4, frequency_masking_1),
+            (0.3, frequency_masking_2),
+            (0.4, time_masking),
+            (0.3, time_shifter_1),
+            (0.3, time_shifter_2),
+            (0.2, power_enhancer_1),
+            (0.2, power_enhancer_2)
         ]
 
     @property

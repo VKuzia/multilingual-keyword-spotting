@@ -5,6 +5,7 @@ from abc import abstractmethod
 import torch.optim
 from torch import nn
 
+from src.models import ClassifierKernel
 from src.utils import no_none_dataclass
 
 
@@ -15,18 +16,18 @@ class ModelInfoTag:
     Would be used for saving files, titles of plots etc.
     """
     name: str
-    version_tag: str
-    languages: List[str]
-    dataset_par: str
+    id_: str
+    model_version: str
+    data_version: str
 
     def get_name(self) -> str:
-        return f'{self.name}_{self.version_tag}'
+        return f'{self.name}_#{self.id_}'
 
 
 @no_none_dataclass(iterable_ok=True)
 class ModelLearningInfo:
     """
-    Dataclass containing information about model learning progress.
+    Dataclass containing information about model's learning progress.
     Contains useful information for printing model's stats.
     """
     epochs_trained: int = 0
@@ -40,7 +41,8 @@ class ModelCheckpoint:
     Dataclass containing model's state to be saved.
     Is used in loading and saving models. See ModelIOHelper.
     """
-    kernel_state_dict: Dict[Any, Any]
+    embedding_state_dict: Dict[Any, Any]
+    output_layer_state_dict: Dict[Any, Any]
     optimizer_state_dict: Dict[Any, Any]
     scheduler_state_dict: Dict[Any, Any]
     learning_info: ModelLearningInfo
@@ -62,12 +64,12 @@ class Model:
     """
 
     def __init__(self,
-                 kernel: nn.Module,
+                 kernel: ClassifierKernel,
                  optimizer: torch.optim.Optimizer,
                  scheduler: torch.optim.Optimizer,
                  loss_function: torch.nn.modules.Module,
                  info_tag: ModelInfoTag, cuda: bool = True):
-        self.kernel: nn.Module = kernel.to('cuda' if cuda else 'cpu')
+        self.kernel: ClassifierKernel = kernel.to('cuda' if cuda else 'cpu')
         self.optimizer: torch.optim.Optimizer = optimizer
         self.scheduler: torch.optim.Optimizer = scheduler
         self.loss_function: torch.nn.modules.Module = loss_function
@@ -88,8 +90,8 @@ class Model:
         Returns model's data in a form of a ModelCheckpoint instance
         :return: ModelCheckpoint instance
         """
-        self.checkpoint_id += 1
-        return ModelCheckpoint(self.kernel.state_dict(),
+        return ModelCheckpoint(self.kernel.embedding.state_dict(),
+                               self.kernel.output.state_dict(),
                                self.optimizer.state_dict(),
                                self.scheduler.state_dict(),
                                self.learning_info,
@@ -98,7 +100,7 @@ class Model:
 
     @staticmethod
     @abstractmethod
-    def get_kernel_class() -> Type[nn.Module]:
+    def get_embedding_class() -> Type[nn.Module]:
         """Returns kernel nn.Module of given model"""
 
     @staticmethod
