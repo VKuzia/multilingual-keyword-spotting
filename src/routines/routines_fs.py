@@ -77,7 +77,7 @@ def build_default_fs_model(config: Config,
         for parameter in embedding.kernel.parameters():
             parameter.requires_grad = False
 
-        kernel_class = model_class.get_kernel_class()
+        kernel_class = model_class.get_embedding_class()
         kernel_args = {"embedding": embedding.kernel}
         kernel = kernel_class(**kernel_args)
         optimizer = optimizer_class(kernel.output.parameters(), **optimizer_params)

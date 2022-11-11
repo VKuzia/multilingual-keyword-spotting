@@ -15,14 +15,34 @@ class TransferClassifier(nn.Module):
         self.pre_output_categories = pre_output_categories
 
 
+class LogSoftmaxOutput(nn.Module):
+    def __init__(self, pre_output_categories: int, output_categories: int):
+        super().__init__()
+        self.categories_count = output_categories
+        self.linear = nn.Linear(pre_output_categories, output_categories)
+        self.smooth = nn.LogSoftmax(dim=1)
+
+    def forward(self, x):
+        return self.smooth(self.linear(x))
+
+
+class ClassifierKernel(nn.Module):
+
+    def __init__(self, embedding: TransferClassifier, output):
+        super().__init__()
+        self.embedding = embedding
+        self.output = output
+
+    def forward(self, x):
+        x = self.embedding(x)
+        return self.output(x)
+
+
 class EfficientNetKernel(TransferClassifier):
     """PyTorch model used as a kernel of CoreModel"""
 
-    def __init__(self, efficient_net: nn.Module = single_b0(),
-                 output_channels: Optional[int] = None):
+    def __init__(self, efficient_net: nn.Module = single_b0()):
         super().__init__(1024)
-        self.output_categories = output_channels
-        self.output_on = True if output_channels is not None else False
         self.efficient_net = efficient_net
 
         # changing last layer of efficient net
@@ -46,35 +66,11 @@ class EfficientNetKernel(TransferClassifier):
             nn.SELU()
         )
 
-        if self.output_on:
-            self.output = nn.Sequential(
-                nn.Linear(1024, self.output_categories),
-                nn.LogSoftmax(dim=1)
-            )
-
     def forward(self, x):
         x = self.efficient_net(x)
         x = self.relu2(x)
         x = self.selu(x)
-        if self.output_on:
-            return self.output(x)
-        else:
-            return x
-
-
-class CoreModel(Model):
-    """
-    The core of a multilingual embedding.
-    Uses an untrained instance of EfficientNet_b0.
-    """
-
-    @staticmethod
-    def get_kernel_class() -> Type[nn.Module]:
-        return EfficientNetKernel
-
-    @staticmethod
-    def get_loss_function() -> torch.nn.modules.Module:
-        return torch.nn.NLLLoss()
+        return x
 
 
 class CnnKernel(TransferClassifier):
@@ -193,7 +189,7 @@ class CnnModel(Model):
     """
 
     @staticmethod
-    def get_kernel_class() -> Type[nn.Module]:
+    def get_embedding_class() -> Type[nn.Module]:
         return CnnKernel
 
     @staticmethod
@@ -386,7 +382,7 @@ class CnnXModel(Model):
     """
 
     @staticmethod
-    def get_kernel_class() -> Type[nn.Module]:
+    def get_embedding_class() -> Type[nn.Module]:
         return CnnXKernel
 
     @staticmethod
@@ -580,7 +576,7 @@ class CnnYModel(Model):
     """
 
     @staticmethod
-    def get_kernel_class() -> Type[nn.Module]:
+    def get_embedding_class() -> Type[nn.Module]:
         return CnnYKernel
 
     @staticmethod

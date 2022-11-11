@@ -22,7 +22,8 @@ class ModelIO:
             \____<scheduler_state.pth>
     """
 
-    KERNEL_STATE_DICT_NAME = "kernel_state.pth"
+    EMBEDDING_STATE_DICT_NAME = "embedding_state.pth"
+    OUTPUT_LAYER_STATE_DICT_NAME = "output_layer_state.pth"
     OPTIMIZER_STATE_DICT_NAME = "optimizer_state.pth"
     SCHEDULER_STATE_DICT_NAME = "scheduler_state.pth"
     INFO_NAME = "model_info.json"
@@ -100,8 +101,9 @@ class ModelIO:
         :return:
         """
         directory = self._get_dir(model_info, checkpoint_version)
-        kernel = self.load_module(model_class.get_kernel_class(), model_info, checkpoint_version,
-                                  kernel_args=kernel_args, load_output_layer=load_output_layer)
+        embedding = self.load_module(model_class.get_embedding_class(), model_info,
+                                     checkpoint_version,
+                                     kernel_args=kernel_args, load_output_layer=load_output_layer)
         optimizer = None
         if optimizer_class:
             if not output_only:
@@ -142,7 +144,9 @@ class ModelIO:
             os.makedirs(directory)
         except OSError as error:
             print(error)
-        torch.save(checkpoint.kernel_state_dict, f'{directory}/{self.KERNEL_STATE_DICT_NAME}')
+        torch.save(checkpoint.embedding_state_dict, f'{directory}/{self.EMBEDDING_STATE_DICT_NAME}')
+        torch.save(checkpoint.output_layer_state_dict,
+                   f'{directory}/{self.OUTPUT_LAYER_STATE_DICT_NAME}')
         torch.save(checkpoint.optimizer_state_dict, f'{directory}/{self.OPTIMIZER_STATE_DICT_NAME}')
         torch.save(checkpoint.scheduler_state_dict, f'{directory}/{self.SCHEDULER_STATE_DICT_NAME}')
 
@@ -154,16 +158,16 @@ class ModelIO:
 
     def _get_dir(self, model_info: ModelInfoTag, checkpoint_version: int) -> str:
         """Constructs directory name according given model_info and checkpoint version."""
-        return f"{self.base_path}/{model_info.name}_{model_info.version_tag}_[{checkpoint_version}]"
+        return f"{self.base_path}/{model_info.get_name()}_[{checkpoint_version}]"
 
-    @staticmethod
-    def _cut_output_layer(path: str) -> Dict[str, Any]:
-        """
-        Loads tensor from path provided and omitts its output layer.
-        Is used for transfer learning with few-shot
-        """
-        state_dict = torch.load(path)
-        k_pop = [key for key in state_dict.keys() if key.startswith('output')]
-        for key in k_pop:
-            state_dict.pop(key, None)
-        return state_dict
+    # @staticmethod
+    # def _cut_output_layer(path: str) -> Dict[str, Any]:
+    #     """
+    #     Loads tensor from path provided and omitts its output layer.
+    #     Is used for transfer learning with few-shot
+    #     """
+    #     state_dict = torch.load(path)
+    #     k_pop = [key for key in state_dict.keys() if key.startswith('output')]
+    #     for key in k_pop:
+    #         state_dict.pop(key, None)
+    #     return state_dict

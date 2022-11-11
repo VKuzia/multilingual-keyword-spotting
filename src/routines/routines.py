@@ -78,7 +78,7 @@ def build_default_model(config: Config,
             scheduler_class = get_scheduler_class(config['scheduler_class'])
             model.scheduler = scheduler_class(model.optimizer, **config['scheduler_parameters'])
     else:
-        kernel_class = model_class.get_kernel_class()
+        kernel_class = model_class.get_embedding_class()
         kernel_args = {"output_channels": output_channels}
         kernel = kernel_class(**kernel_args)
         optimizer = optimizer_class(kernel.parameters(), **optimizer_params)

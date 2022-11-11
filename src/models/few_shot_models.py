@@ -34,7 +34,7 @@ class FewShotModel(Model):
     """
 
     @staticmethod
-    def get_kernel_class() -> Type[nn.Module]:
+    def get_embedding_class() -> Type[nn.Module]:
         return FsKernel
 
     @staticmethod
