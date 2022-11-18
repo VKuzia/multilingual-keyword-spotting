@@ -45,6 +45,7 @@ def select_by_len_and_top(data, min_len, count):
     df = df.sort_values('count', axis=0, ascending=False)
     return list(df[:count].index)
 
+
 def sample(data, count):
     indices = np.random.random_integers(low=0, high=count - 1, size=(count,))
     return data.iloc[indices]

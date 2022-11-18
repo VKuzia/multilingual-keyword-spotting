@@ -52,7 +52,7 @@ class ClassificationDataLoader(BaseDataLoader):
             self._dataset,
             batch_size=self.batch_size,
             shuffle=True,
-            collate_fn=self.collate_fn,
+            collate_fn=self.collate_fn
             # pin_memory=cuda
         )
         self._loader_iter = iter(self._loader)
