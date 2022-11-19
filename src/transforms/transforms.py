@@ -19,8 +19,7 @@ class TimeShifter:
 
 class PowerEnhance:
     """
-    Provides time shift transform on given Tensor (aka MelSpectrogram).
-    Uses torch.roll, which performs a cyclic (!) shift, so it's useful only for small shifts
+    Scales each element of given tensor with given exponential coefficient.
     """
 
     def __init__(self, power: float):

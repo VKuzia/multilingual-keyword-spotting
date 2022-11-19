@@ -52,7 +52,6 @@ class Trainer:
 
             for handler in self.post_epoch_handlers:
                 handler.handle(model, mode=HandlerMode.POST_EPOCH)
-            model.learning_info.epochs_trained += 1
 
     @abstractmethod
     def train_epoch(self, model: Model, data_loader: DataLoader, params: TrainingParams,

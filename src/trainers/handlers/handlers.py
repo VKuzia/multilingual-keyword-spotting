@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -38,14 +39,22 @@ class ModelSaver(LearningHandler):
     Saves the model one time in epoch_rate epochs. Uses ModelIOHelper instance provided.
     """
 
-    def __init__(self, model_io: ModelIO, epoch_rate: int = 1):
+    def __init__(self, model_io: ModelIO, config, output_dir: str,
+                 epoch_rate: int = 1, full_path: bool = True):
         self.model_io = model_io
         self.epoch_rate = epoch_rate
         self.epochs_to_save = epoch_rate
+        self.config = config
+        self.output_dir = output_dir
+        self.full_path = full_path
+        self.version = 0
 
     def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE) -> None:
         """Decreases self.epochs_to_save and uses self.model_io to save model when needed"""
         self.epochs_to_save -= 1
         if self.epochs_to_save == 0:
+            self.version += 1
             self.epochs_to_save = self.epoch_rate
-            self.model_io.save_model(model)
+            self.model_io.save_model(self.config, model,
+                                     os.path.join(self.output_dir, str(self.version)),
+                                     full_path=self.full_path)

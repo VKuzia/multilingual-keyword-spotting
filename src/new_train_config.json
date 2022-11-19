@@ -1,0 +1,34 @@
+{
+  "data": {
+    "root": "wav",
+    "table": "wav/ru/ru_popular_100_modified.csv",
+    "batch_size": 64
+  },
+  "model": {
+    "embedding": {
+      "name": "efficient_net",
+      "output": 1024,
+      "hidden": 2048
+    },
+    "head": {
+      "name": "softmax",
+      "input": 1024,
+      "output": 100
+    }
+  },
+  "optimizer": {
+    "name": "SGD",
+    "lr": 0.001
+  },
+  "scheduler": {
+    "name": "exponential",
+    "gamma": 0.9
+  },
+  "loss": {
+    "name": "xent"
+  },
+  "batches_per_validation": 64,
+  "epochs": 10,
+  "save_after": 2,
+  "batches_per_epoch": 256
+}
