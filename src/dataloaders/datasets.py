@@ -79,7 +79,10 @@ def is_word_predicate(word: str) -> Callable[[str], bool]:
     return lambda x: x.split('/')[0] == word
 
 
-class WalkerDataset(Dataset):
+class TableDataset(Dataset):
+    """
+    Reads given csv and provides data from root dataset's dir. Accepts filtering by mode or lambda.
+    """
 
     @property
     def unknown_index(self) -> Optional[int]:

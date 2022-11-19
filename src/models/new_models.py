@@ -6,6 +6,10 @@ import torch.nn as nn
 
 
 class Module(nn.Module):
+    """
+    Abstraction for all Modules in project to save additional information on their structure.
+    Basically translates constructor parameters into a dictionary to recreate model further.
+    """
 
     def __init__(self):
         super().__init__()

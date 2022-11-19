@@ -51,20 +51,19 @@ class MetricHandler(LearningHandler):
             outputs = torch.concat(outputs)
             for name, func in zip(self.metrics_names, self.metric_functions):
                 key = f'{name}_{"train" if self.validation_mode == ValidationMode.TRAINING else "val"}'
-                model.learning_info.metrics[key].append(func(target, pred, outputs))
+                result = func(target, outputs) if 'xent' in name else func(target, pred)
+                model.learning_info.metrics[key].append(result)
         if self.switch_to_train:
             model.kernel.train()
 
 
-def estimate_multiclass_accuracy(target: torch.Tensor, pred: torch.Tensor,
-                                 outputs: Optional[torch.Tensor]) -> float:
+def estimate_multiclass_accuracy(target: torch.Tensor, pred: torch.Tensor) -> float:
     labels = set(target.tolist())
     accuracies = {x: (torch.sum(torch.logical_and(target == x, target == pred))
-                     / torch.sum(target == x)).item() for x in labels}
+                      / torch.sum(target == x)).item() for x in labels}
     weights = {x: (torch.sum(target == x) / len(target)).item() for x in labels}
     return sum([accuracies[x] * weights[x] for x in labels])
 
 
-def estimate_cross_entropy_loss(target: torch.Tensor, pred: torch.Tensor,
-                                outputs: Optional[torch.Tensor]) -> float:
+def estimate_cross_entropy_loss(target: torch.Tensor, outputs: Optional[torch.Tensor]) -> float:
     return F.cross_entropy(outputs, target).item()

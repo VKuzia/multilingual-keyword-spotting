@@ -21,21 +21,21 @@ def _parse_args():
 
 
 def get_dataloaders(config, datapath: str) -> (data.DataLoader, data.DataLoader):
-    train_dataset: data.Dataset = data.WalkerDataset(os.path.join(datapath, config['data']['root']),
-                                                     os.path.join(datapath,
+    train_dataset: data.Dataset = data.TableDataset(os.path.join(datapath, config['data']['root']),
+                                                    os.path.join(datapath,
                                                                   config['data']['table']),
-                                                     data.DataLoaderMode.TRAINING,
-                                                     config['data'].get('from_spectrograms', False))
+                                                    data.DataLoaderMode.TRAINING,
+                                                    config['data'].get('from_spectrograms', False))
     train_loader: data.DataLoader = data.ClassificationDataLoader(train_dataset,
                                                                   config['data']['batch_size'],
                                                                   config['data'].get('cuda', True))
 
     val_dataset: data.Dataset = \
-        data.WalkerDataset(os.path.join(datapath, config['data']['root']),
-                           os.path.join(datapath,
+        data.TableDataset(os.path.join(datapath, config['data']['root']),
+                          os.path.join(datapath,
                                         config['data'].get('val_table', config['data']['table'])),
-                           data.DataLoaderMode.VALIDATION,
-                           config['data'].get('is_wav', False))
+                          data.DataLoaderMode.VALIDATION,
+                          config['data'].get('is_wav', False))
     val_loader: data.DataLoader = \
         data.ClassificationDataLoader(val_dataset,
                                       config['data'].get('val_batch_size',

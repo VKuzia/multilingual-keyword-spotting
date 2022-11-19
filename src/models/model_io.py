@@ -2,11 +2,10 @@ import copy
 import json
 import os
 import shutil
-from typing import List, Tuple
 
 import torch
 import src.models.new_models as models
-import src.models.model as model
+import src.models.model as md
 
 
 class ModelIO:
@@ -20,15 +19,21 @@ class ModelIO:
     def __init__(self, root: str):
         self.root = root
 
-    def build_model(self, config) -> model.Model:
-        kernel = models.TotalKernel(self.build_module(config['model']['embedding'], self.root),
-                                    self.build_module(config['model']['head'], self.root))
-        optimizer = self.build_optimizer(config['optimizer'], kernel, self.root)
-        scheduler = self.build_scheduler(config['scheduler'], optimizer, self.root)
-        loss = self.build_loss(config['loss'])
-        return model.Model(kernel, optimizer, scheduler, loss)
+    def build_model(self, config) -> md.Model:
+        """
+        Provides the ready-to-go Model instance according to config.
+        All checkpoint loading and pytorch elements building structure is encapsulated here.
+        Config must provide full descriptions of 'model' (both 'embedding' and 'head'),
+        'optimizer', 'scheduler' and 'loss' instances to use.
+        """
+        kernel = models.TotalKernel(self._build_module(config['model']['embedding'], self.root),
+                                    self._build_module(config['model']['head'], self.root))
+        optimizer = self._build_optimizer(config['optimizer'], kernel, self.root)
+        scheduler = self._build_scheduler(config['scheduler'], optimizer, self.root)
+        loss = self._build_loss(config['loss'])
+        return md.Model(kernel, optimizer, scheduler, loss)
 
-    def save_model(self, config, model: model.Model, output_dir: str, full_path: bool = True):
+    def save_model(self, config, model: md.Model, output_dir: str, full_path: bool = True):
         dir_path = os.path.join(self.root, output_dir) if not full_path else output_dir
         if os.path.exists(dir_path):
             shutil.rmtree(dir_path)
@@ -46,7 +51,8 @@ class ModelIO:
         with open(os.path.join(dir_path, self.CONFIG_NAME), 'w') as config_file:
             json.dump(config, config_file, indent=2)
 
-    def build_module(self, config, root: str) -> models.Module:
+    @staticmethod
+    def _build_module(config, root: str) -> models.Module:
         if config['name'] == 'efficient_net':
             module = models.EfficientNetKernel(config['output'], config['hidden'])
         elif config['name'] == 'softmax':
@@ -60,7 +66,8 @@ class ModelIO:
                 param.requires_grad = False
         return module
 
-    def build_optimizer(self, config, model: models.Module, root: str) -> torch.optim.Optimizer:
+    @staticmethod
+    def _build_optimizer(config, model: models.Module, root: str) -> torch.optim.Optimizer:
         config_copy = copy.deepcopy(config)
         del config_copy['name']
         if config_copy.get('path'):
@@ -75,7 +82,8 @@ class ModelIO:
             optimizer.load_state_dict(torch.load(os.path.join(root, config['path'])))
         return optimizer
 
-    def build_scheduler(self, config, optimizer: torch.optim.Optimizer, root: str):
+    @staticmethod
+    def _build_scheduler(config, optimizer: torch.optim.Optimizer, root: str):
         config_copy = copy.deepcopy(config)
         del config_copy['name']
         if config_copy.get('path'):
@@ -88,7 +96,8 @@ class ModelIO:
             scheduler.load_state_dict(torch.load(os.path.join(root, config['path'])))
         return scheduler
 
-    def build_loss(self, config):
+    @staticmethod
+    def _build_loss(config):
         if config['name'] == 'xent':
             return torch.nn.NLLLoss()
         else:

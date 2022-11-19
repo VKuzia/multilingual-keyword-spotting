@@ -19,6 +19,7 @@ class TimeShifter:
 
 class PowerEnhance:
     """
+    Scales each element of given tensor with given exponential coefficient.
     """
 
     def __init__(self, power: float):

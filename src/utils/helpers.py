@@ -25,7 +25,8 @@ def rand_indices(high: int, size: int) -> List[int]:
     return list(np.random.random_integers(low=0, high=high, size=(size,)))
 
 
-def dir_path(path):
+def dir_path(path: str) -> str:
+    """argparse crutch to check whether given path is a directory"""
     if os.path.isdir(path):
         return path
     else:

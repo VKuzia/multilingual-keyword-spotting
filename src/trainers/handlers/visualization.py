@@ -25,6 +25,8 @@ class Printer:
         self._step_progressbar.reset(total=self.batches_num)
 
     def update_metrics(self, metrics_dict: Dict[str, float]):
+        """Prints model's metrics to epoch progressbar.
+        Uses keys from intersection of self.metrics and given dict"""
         content = '; '.join(['{}({:.3f})'.format(key, metrics_dict[key]) for key in self.metrics if
                              key in metrics_dict.keys()])
         self._epochs_progressbar.set_postfix_str(content)

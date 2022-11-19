@@ -71,7 +71,7 @@ class ClassificationDataLoader(BaseDataLoader):
         return self._dataset.labels
 
     def label_to_index(self, word: str) -> int:
-        """Returns the index of the given word"""
+        """Returns the index of the given word, handles unknown label specifically"""
         if word in self.labels_map.keys():
             return self.labels_map[word]
         else:
