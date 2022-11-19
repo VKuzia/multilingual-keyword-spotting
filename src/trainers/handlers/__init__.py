@@ -1,3 +1,3 @@
 from .handlers import HandlerMode, LearningHandler, ModelSaver
-from .validators import ValidationMode, ClassificationValidator, estimate_accuracy
+from .metrics import *
 from .visualization import Printer, PrinterHandler

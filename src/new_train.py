@@ -16,7 +16,7 @@ def _parse_args():
     parser.add_argument('--datapath', type=utils.dir_path, help='path to dataset dir')
     parser.add_argument('--saved-models', type=utils.dir_path, help='path to saved models dir',
                         default='./saved')
-    parser.add_argument('--output', type=utils.dir_path, help='path to checkpoint dir')
+    parser.add_argument('--output', type=str, help='path to checkpoint dir')
     return parser.parse_args()
 
 
@@ -47,16 +47,19 @@ def get_dataloaders(config, datapath: str) -> (data.DataLoader, data.DataLoader)
 def build_trainer(config, train_loader: data.DataLoader,
                   val_loader: data.DataLoader, model_io: models.ModelIO,
                   output_dir: str) -> trainers.Trainer:
-    validation_validator: handlers.ClassificationValidator = \
-        handlers.ClassificationValidator(val_loader,
-                                         batch_count=config['batches_per_validation'],
-                                         mode=handlers.ValidationMode.VALIDATION)
-    training_validator: handlers.ClassificationValidator = \
-        handlers.ClassificationValidator(train_loader,
-                                         batch_count=config['batches_per_validation'],
-                                         mode=handlers.ValidationMode.TRAINING)
+    validation_validator: handlers.MetricHandler = \
+        handlers.MetricHandler(val_loader,
+                               batch_count=config['batches_per_validation'],
+                               mode=handlers.ValidationMode.VALIDATION,
+                               metrics=['xent', 'multiacc'])
+    training_validator: handlers.MetricHandler = \
+        handlers.MetricHandler(train_loader,
+                               batch_count=config['batches_per_validation'],
+                               mode=handlers.ValidationMode.TRAINING,
+                               metrics=['xent', 'multiacc'])
 
-    printer: handlers.Printer = handlers.Printer(config['epochs'], config['batches_per_epoch'])
+    printer: handlers.Printer = handlers.Printer(config['epochs'], config['batches_per_epoch'],
+                                                 ['xent_train', 'xent_val', 'multiacc_val'])
     printer_handler: handlers.PrinterHandler = handlers.PrinterHandler(printer)
     saver: handlers.ModelSaver = handlers.ModelSaver(model_io, config, output_dir,
                                                      epoch_rate=config['save_after'])
@@ -69,6 +72,8 @@ def main():
     args = _parse_args()
     config = json.loads(args.config.read())
     train_loader, val_loader = get_dataloaders(config, args.datapath)
+    assert len(train_loader.get_labels()) == config['model']['head']['output']
+    assert len(val_loader.get_labels()) == config['model']['head']['output']
     model_io: models.ModelIO = models.ModelIO(args.saved_models)
     model: models.Model = model_io.build_model(config)
     trainer: trainers.Trainer = build_trainer(config, train_loader, val_loader, model_io,

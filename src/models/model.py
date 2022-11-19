@@ -1,6 +1,7 @@
 from dataclasses import field
 from typing import Dict, Any, Type, List
 from abc import abstractmethod
+from collections import defaultdict
 
 import torch.optim
 from torch import nn
@@ -15,13 +16,13 @@ class ModelLearningInfo:
     Dataclass containing information about model's learning progress.
     Contains useful information for printing model's stats.
     """
-    val_accuracy_history: List[float] = field(default_factory=list)
-    train_accuracy_history: List[float] = field(default_factory=list)
+    metrics: Dict[str, List[float]] = field(default_factory=lambda: defaultdict(list))
+    other: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "val_accuracy": self.val_accuracy_history,
-            "train_accuracy": self.train_accuracy_history
+            "metrics": self.metrics,
+            "other": self.other
         }
 
 

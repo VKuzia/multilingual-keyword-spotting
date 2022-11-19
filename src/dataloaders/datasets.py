@@ -102,7 +102,7 @@ class WalkerDataset(Dataset):
             raise ValueError(f"Can't handle unknown DataLoaderMode '{subset.name}'")
         self.data = self._load_by_mode(data_csv, mode, predicate)
         self._load_method = self._load_wav if self.is_wav else self._load_spec
-        self._labels = list(self.data['label'].unique())
+        self._labels = sorted(list(self.data['label'].unique()))
         if not self.is_wav:
             self.data['path'] = self.data['path'].apply(lambda x: x.replace(".wav", ".pt"))
 
@@ -231,7 +231,7 @@ class TargetProbaFsDataset(Dataset):
         if label == self.target:
             label = 'target'
         else:
-            label = 'unknown'
+            label = '_unknown'
         return data, label
 
     def __len__(self) -> int:
@@ -243,7 +243,7 @@ class TargetProbaFsDataset(Dataset):
 
     @property
     def labels(self) -> List[str]:
-        return ["unknown", "target"]
+        return ["_unknown", "target"]
 
 
 class SampledDataset(Dataset):
