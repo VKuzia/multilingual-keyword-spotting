@@ -19,18 +19,19 @@ class ModelIO:
     def __init__(self, root: str):
         self.root = root
 
-    def build_model(self, config) -> md.Model:
+    def build_model(self, config, cuda: bool = True) -> md.Model:
         """
         Provides the ready-to-go Model instance according to config.
         All checkpoint loading and pytorch elements building structure is encapsulated here.
         Config must provide full descriptions of 'model' (both 'embedding' and 'head'),
         'optimizer', 'scheduler' and 'loss' instances to use.
         """
-        kernel = models.TotalKernel(self._build_module(config['model']['embedding'], self.root),
-                                    self._build_module(config['model']['head'], self.root))
-        optimizer = self._build_optimizer(config['optimizer'], kernel, self.root)
-        scheduler = self._build_scheduler(config['scheduler'], optimizer, self.root)
-        loss = self._build_loss(config['loss'])
+        kernel = models.TotalKernel(self.build_module(config['model']['embedding'], self.root),
+                                    self.build_module(config['model']['head'], self.root))
+        kernel = kernel.to('cuda' if cuda else 'cpu')
+        optimizer = self.build_optimizer(config['optimizer'], kernel, self.root)
+        scheduler = self.build_scheduler(config['scheduler'], optimizer, self.root)
+        loss = self.build_loss(config['loss'])
         return md.Model(kernel, optimizer, scheduler, loss)
 
     def save_model(self, config, model: md.Model, output_dir: str, full_path: bool = True):
@@ -52,9 +53,11 @@ class ModelIO:
             json.dump(config, config_file, indent=2)
 
     @staticmethod
-    def _build_module(config, root: str) -> models.Module:
+    def build_module(config, root: str) -> models.Module:
         if config['name'] == 'efficient_net':
             module = models.EfficientNetKernel(config['output'], config['hidden'])
+        elif config['name'] == 'cnn_y':
+            module = models.CnnYKernel(config['output'], config['size'])
         elif config['name'] == 'softmax':
             module = models.SoftmaxHeadKernel(config['input'], config['output'])
         else:
@@ -67,7 +70,7 @@ class ModelIO:
         return module
 
     @staticmethod
-    def _build_optimizer(config, model: models.Module, root: str) -> torch.optim.Optimizer:
+    def build_optimizer(config, model: models.Module, root: str) -> torch.optim.Optimizer:
         config_copy = copy.deepcopy(config)
         del config_copy['name']
         if config_copy.get('path'):
@@ -83,7 +86,7 @@ class ModelIO:
         return optimizer
 
     @staticmethod
-    def _build_scheduler(config, optimizer: torch.optim.Optimizer, root: str):
+    def build_scheduler(config, optimizer: torch.optim.Optimizer, root: str):
         config_copy = copy.deepcopy(config)
         del config_copy['name']
         if config_copy.get('path'):
@@ -97,7 +100,7 @@ class ModelIO:
         return scheduler
 
     @staticmethod
-    def _build_loss(config):
+    def build_loss(config):
         if config['name'] == 'xent':
             return torch.nn.NLLLoss()
         else:

@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 
 from src.models import Model, ModelIO
+import src.dataloaders as data
 
 
 class HandlerMode(Enum):
@@ -58,3 +59,12 @@ class ModelSaver(LearningHandler):
             self.model_io.save_model(self.config, model,
                                      os.path.join(self.output_dir, str(self.version)),
                                      full_path=self.full_path)
+
+
+class DataloaderResetter(LearningHandler):
+
+    def __init__(self, loader: data.DataLoader):
+        self.loader = loader
+
+    def handle(self, model: Model, mode: HandlerMode = HandlerMode.NONE):
+        self.loader.reset()

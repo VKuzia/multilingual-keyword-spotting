@@ -43,6 +43,9 @@ class BaseDataLoader(DataLoader, ABC):
 class ClassificationDataLoader(BaseDataLoader):
     """Implements batch loading for given Dataset instance. Each word has it's own label category"""
 
+    def get_batch_count(self) -> int:
+        return (len(self._dataset) + self.batch_size - 1) // self.batch_size
+
     def __init__(self, dataset: Dataset, batch_size: int, cuda: bool = True):
         self._dataset = dataset
         self.labels = self._dataset.labels
@@ -61,7 +64,7 @@ class ClassificationDataLoader(BaseDataLoader):
         try:
             data, labels = next(self._loader_iter)
         except StopIteration:
-            self._loader_iter = iter(self._loader)
+            self.reset()
             data, labels = next(self._loader_iter)
         if data.shape[1] != 1:
             data = torch.unsqueeze(data, 1)
@@ -79,3 +82,6 @@ class ClassificationDataLoader(BaseDataLoader):
                 return self._dataset.unknown_index
             else:
                 raise ValueError("Unknown label but 'unknown' is not a target category")
+
+    def reset(self):
+        self._loader_iter = iter(self._loader)

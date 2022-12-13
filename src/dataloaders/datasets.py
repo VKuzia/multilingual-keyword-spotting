@@ -34,7 +34,15 @@ class DataLoader(ABC):
         """
 
     @abstractmethod
+    def get_batch_count(self) -> int:
+        pass
+
+    @abstractmethod
     def get_labels(self) -> List[str]:
+        pass
+
+    @abstractmethod
+    def reset(self):
         pass
 
 
@@ -176,7 +184,7 @@ class MultiDataset(Dataset):
         return self._datasets[index][n - aggregated]
 
 
-class SpecDataset(Dataset):
+class TransformedDataset(Dataset):
     """
     Dataset wrapper which uses given Transformer instance
     to create spectrogram and augment samples of given dataset

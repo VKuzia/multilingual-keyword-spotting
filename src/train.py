@@ -6,6 +6,7 @@ import src.utils as utils
 import src.dataloaders as data
 import src.models as models
 import src.trainers as trainers
+import src.transforms as transforms
 import src.trainers.handlers as handlers
 
 
@@ -23,9 +24,10 @@ def _parse_args():
 def get_dataloaders(config, datapath: str) -> (data.DataLoader, data.DataLoader):
     train_dataset: data.Dataset = data.TableDataset(os.path.join(datapath, config['data']['root']),
                                                     os.path.join(datapath,
-                                                                  config['data']['table']),
+                                                                 config['data']['table']),
                                                     data.DataLoaderMode.TRAINING,
-                                                    config['data'].get('from_spectrograms', False))
+                                                    config['data'].get('is_wav', False))
+    train_dataset = data.TransformedDataset(train_dataset, transforms.SpecAugTransformer())
     train_loader: data.DataLoader = data.ClassificationDataLoader(train_dataset,
                                                                   config['data']['batch_size'],
                                                                   config['data'].get('cuda', True))
@@ -33,7 +35,7 @@ def get_dataloaders(config, datapath: str) -> (data.DataLoader, data.DataLoader)
     val_dataset: data.Dataset = \
         data.TableDataset(os.path.join(datapath, config['data']['root']),
                           os.path.join(datapath,
-                                        config['data'].get('val_table', config['data']['table'])),
+                                       config['data'].get('val_table', config['data']['table'])),
                           data.DataLoaderMode.VALIDATION,
                           config['data'].get('is_wav', False))
     val_loader: data.DataLoader = \
@@ -49,7 +51,7 @@ def build_trainer(config, train_loader: data.DataLoader,
                   output_dir: str) -> trainers.Trainer:
     validation_validator: handlers.MetricHandler = \
         handlers.MetricHandler(val_loader,
-                               batch_count=config['batches_per_validation'],
+                               batch_count=None,
                                mode=handlers.ValidationMode.VALIDATION,
                                metrics=['xent', 'multiacc'])
     training_validator: handlers.MetricHandler = \
@@ -72,6 +74,8 @@ def main():
     args = _parse_args()
     config = json.loads(args.config.read())
     train_loader, val_loader = get_dataloaders(config, args.datapath)
+    print(f'Model output [{config["model"]["head"]["output"]}]')
+    print(f'Train labels [{len(train_loader.get_labels())}]')
     assert len(train_loader.get_labels()) == config['model']['head']['output']
     assert len(val_loader.get_labels()) == config['model']['head']['output']
     model_io: models.ModelIO = models.ModelIO(args.saved_models)
@@ -82,7 +86,7 @@ def main():
         batch_count=config['batches_per_epoch'],
         batch_size=config['data']['batch_size'],
         epoch_count=config['epochs'])
-    trainer.train(model, train_loader, training_params)
+    trainer.train([model], train_loader, training_params)
     model_io.save_model(config, model, os.path.join(args.output, 'final'))
     print('DONE')
 

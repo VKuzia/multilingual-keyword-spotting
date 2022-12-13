@@ -19,7 +19,8 @@ def stats_dataset(data):
     """
     TODO: describe the format
     """
-    df = pd.DataFrame(data['label'].value_counts()).rename(columns={'label': 'count'})
+    df = data[data['label'] != 'con']
+    df = pd.DataFrame(df['label'].value_counts()).rename(columns={'label': 'count'})
     for mode in data['mode'].unique():
         df[mode] = data[data['mode'] == mode]['label'].value_counts()
         df[mode] = df[mode].fillna(0).astype(dtype=int)
