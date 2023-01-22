@@ -12,8 +12,8 @@ class Printer:
     def __init__(self, epochs: int, batches_num: int, metrics: List[str]):
         self.batches_num = batches_num
         self.metrics = sorted(metrics)
-        self._epochs_progressbar = tqdm(total=epochs, leave=False)
-        self._step_progressbar = tqdm(total=self.batches_num, leave=False)
+        self._epochs_progressbar = tqdm(total=epochs, leave=False, desc='epochs')
+        self._step_progressbar = tqdm(total=self.batches_num, leave=False, desc='steps')
 
     def update_step(self):
         """Updates step progressbar"""

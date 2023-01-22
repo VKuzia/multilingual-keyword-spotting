@@ -1,6 +1,9 @@
 from abc import abstractmethod
 from typing import List
 
+import numpy as np
+
+from src import models
 from src.dataloaders import DataLoader
 from src.trainers.handlers import LearningHandler, HandlerMode
 from src.models import Model
@@ -34,24 +37,27 @@ class Trainer:
         self.post_epoch_handlers = post_epoch_handlers
         self.silent = silent
 
-    def train(self, model: Model, data_loader: DataLoader, params: TrainingParams) -> None:
+    def train(self, models_list: List[models.Model], data_loader: DataLoader,
+              params: TrainingParams) -> None:
         """
         Performs the training loop for Model instance. All type of handlers are involved,
         however the epoch training logic is encapsulated
         via @abstractmethod to give the space for extensibility.
-        :param model: the Model instance to be trained
+        :param models_list: the Model instances to be trained
         :param data_loader: entity which provides the model with training data and training labels
         :param params: the set of cycle's parameters
         :return: None
         """
-        for _ in range(params.epoch_count):
-            for handler in self.pre_epoch_handlers:
-                handler.handle(model, mode=HandlerMode.PRE_EPOCH)
+        for i in range(params.epoch_count):
+            for model in models_list:
+                np.random.seed(i + 29)
+                for handler in self.pre_epoch_handlers:
+                    handler.handle(model, mode=HandlerMode.PRE_EPOCH)
 
-            self.train_epoch(model, data_loader, params, self.after_step_handlers)
+                self.train_epoch(model, data_loader, params, self.after_step_handlers)
 
-            for handler in self.post_epoch_handlers:
-                handler.handle(model, mode=HandlerMode.POST_EPOCH)
+                for handler in self.post_epoch_handlers:
+                    handler.handle(model, mode=HandlerMode.POST_EPOCH)
 
     @abstractmethod
     def train_epoch(self, model: Model, data_loader: DataLoader, params: TrainingParams,
@@ -76,7 +82,9 @@ class DefaultTrainer(Trainer):
                     after_step_handlers: List[LearningHandler] = None) -> None:
         """Iterates over params.batch_count of batches, to train on them.
         Invokes after_step_handlers after pushing the gradients backward."""
-        for _ in range(params.batch_count):
+        model.kernel.train()
+        batch_count = params.batch_count if params.batch_count else data_loader.get_batch_count()
+        for _ in range(batch_count):
             data_batch, labels_batch = data_loader.get_batch()
             model.optimizer.zero_grad(set_to_none=True)
             model_output = model(data_batch)
