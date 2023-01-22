@@ -200,6 +200,10 @@ class CnnYKernel(Module):
         )
 
     def forward(self, x):
+        one_shaped = x.shape[0] == 1
+        if one_shaped:
+            print('ONE SHAPED')
+            x = torch.stack([x[0], x[0]])
         a = self.conv_a_1(x)
         a = self.conv_a_2(a)
         a = self.conv_a_3(a)
@@ -221,6 +225,8 @@ class CnnYKernel(Module):
         y = torch.concat([a, b, c], dim=1)
         y = self.linear_1(y)
         y = self.linear_2(y)
+        if one_shaped:
+            y = y[0].unsqueeze(0)
         return y
 
 
