@@ -1,0 +1,21 @@
+{
+  "data": {
+    "root": "fbanks",
+    "table": "csv/multilingual/all_multilingual_set.csv",
+    "batch_size": 64
+  },
+  "model": {
+    "embedding": {
+      "path": "multilingual_all_train/final/embedding.pth",
+      "name": "cnn_y",
+      "output": 128,
+      "size": 1
+    },
+    "head": {
+      "path": "multilingual_all_train/final/head.pth",
+      "name": "softmax",
+      "input": 128,
+      "output": 8
+    }
+  }
+}

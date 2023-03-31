@@ -1,0 +1,36 @@
+{
+  "data": {
+    "root": "wav",
+    "table": "new_csvs/pl_top_200_140000.csv",
+    "batch_size": 64
+  },
+  "model": {
+    "embedding": {
+      "name": "cnn_y",
+      "output": 1024,
+      "size": 4,
+      "path": "pl_cnn_y_top_200_22Nov_01/final/embedding.pth"
+    },
+    "head": {
+      "name": "softmax",
+      "input": 1024,
+      "output": 200,
+      "path": "pl_cnn_y_top_200_22Nov_01/final/head.pth"
+    }
+  },
+  "optimizer": {
+    "name": "SGD",
+    "lr": 0.001
+  },
+  "scheduler": {
+    "name": "exponential",
+    "gamma": 0.85
+  },
+  "loss": {
+    "name": "xent"
+  },
+  "batches_per_validation": 200,
+  "epochs": 20,
+  "save_after": 6,
+  "batches_per_epoch": 1750
+}

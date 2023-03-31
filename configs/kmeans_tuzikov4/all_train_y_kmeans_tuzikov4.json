@@ -1,0 +1,37 @@
+{
+  "data": {
+    "root": "fbanks",
+    "is_experiment_dir": true,
+    "path": "experiments/kmeans_tuzikov4_cs_uk_id_et",
+    "batch_size": 60,
+    "val_batch_size": 128
+  },
+  "models": [
+    {
+      "embedding": {
+        "path": "all_train/final/embedding.pth",
+        "name": "cnn_y",
+        "output": 1024,
+        "freeze": true,
+        "size": 4
+      },
+      "head": {
+        "name": "softmax",
+        "input": 1024,
+        "output": 2
+      }
+    }
+  ],
+  "optimizer": {
+    "name": "Adam",
+    "lr": 0.01
+  },
+  "scheduler": {
+    "name": "exponential",
+    "gamma": 0.8
+  },
+  "loss": {
+    "name": "xent"
+  },
+  "epochs": 20
+}

@@ -1,0 +1,8 @@
+{
+  "model": {
+    "path": "multilingual_all_train/final/embedding.pth",
+    "name": "cnn_y",
+    "output": 128,
+    "size": 1
+  }
+}

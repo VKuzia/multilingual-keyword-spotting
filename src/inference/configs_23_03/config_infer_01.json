@@ -1,0 +1,137 @@
+{
+  "model": {
+    "embedding": {
+      "path": "all_train/final/embedding.pth",
+      "name": "cnn_y",
+      "output": 1024,
+      "freeze": true,
+      "size": 4
+    },
+    "old_heads": [
+      {
+        "type": "binary_labeled",
+        "name": "телеграм",
+        "threshold": 0.90,
+        "params": {
+          "path": "телеграм/final/head.pth",
+          "name": "softmax",
+          "input": 1024,
+          "output": 2
+        }
+      },
+      {
+        "type": "binary_labeled",
+        "name": "вжух",
+        "threshold": 0.98,
+        "params": {
+          "path": "вжух/final/head.pth",
+          "name": "softmax",
+          "input": 1024,
+          "output": 2
+        }
+      },
+
+      {
+        "type": "binary_labeled",
+        "name": "братан",
+        "threshold": 0.965,
+        "params": {
+          "path": "братан/final/head.pth",
+          "name": "softmax",
+          "input": 1024,
+          "output": 2
+        }
+      }
+    ],
+    "heads": [
+      {
+        "type": "binary_labeled",
+        "name": "лево",
+        "threshold": 0.90,
+        "params": {
+          "path": "лево/final/head.pth",
+          "name": "softmax",
+          "input": 1024,
+          "output": 2
+        }
+      },
+      {
+        "type": "binary_labeled",
+        "name": "право",
+        "threshold": 0.92,
+        "params": {
+          "path": "право/4/head.pth",
+          "name": "softmax",
+          "input": 1024,
+          "output": 2
+        }
+      },
+      {
+        "type": "binary_labeled",
+        "name": "вжух",
+        "threshold": 0.92,
+        "params": {
+          "path": "вжух/final/head.pth",
+          "name": "softmax",
+          "input": 1024,
+          "output": 2
+        }
+      },
+      {
+        "type": "binary_labeled",
+        "name": "прыг",
+        "threshold": 0.89,
+        "params": {
+          "path": "прыг/final/head.pth",
+          "name": "softmax",
+          "input": 1024,
+          "output": 2
+        }
+      }
+    ]
+  },
+  "old_actions": {
+    "телеграм": {
+      "type": "command",
+      "command": "telegram-desktop"
+    },
+    "вжух": {
+      "type": "command",
+      "command": "firefox https://youtu.be/dQw4w9WgXcQ"
+    },
+    "братан": {
+      "type": "command",
+      "command": "firefox https://memepedia.ru/wp-content/uploads/2020/11/sobaka-v-kostjume-adidas-1.jpeg"
+    }
+  },
+  "actions": {
+    "вжух": {
+      "type": "keyboard",
+      "content": "down"
+    },
+    "прыг": {
+      "type": "keyboard",
+      "content": "up"
+    },
+    "лево": {
+      "type": "keyboard",
+      "content": "left"
+    },
+    "право": {
+      "type": "keyboard",
+      "content": "right"
+    }
+  },
+  "audio_streamer": {
+    "channels": 1,
+    "sample_rate": 16000,
+    "chunks_on_frame": 8,
+    "format": "float_32"
+  },
+  "transformer": {
+    "type": "mel_spectrogram",
+    "timestamps": 40,
+    "n_mels": 49
+  },
+  "cooldown_in_sec": 0.2
+}

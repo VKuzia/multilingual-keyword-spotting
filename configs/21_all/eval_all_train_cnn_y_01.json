@@ -1,0 +1,21 @@
+{
+  "data": {
+    "root": "fbanks",
+    "table": "csv/TRAIN.csv",
+    "batch_size": 64
+  },
+  "model": {
+    "embedding": {
+      "path": "all_train/final/embedding.pth",
+      "name": "cnn_y",
+      "output": 1024,
+      "size": 4
+    },
+    "head": {
+      "path": "all_train/final/head.pth",
+      "name": "softmax",
+      "input": 1024,
+      "output": 2062
+    }
+  }
+}
